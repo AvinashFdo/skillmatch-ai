@@ -2,8 +2,8 @@
 role_fit_scorer.py
 -------------------
 Takes the skills extracted by skill_extractor.py and scores how well a
-candidate fits each of the 4 supported career roles defined in
-career_roles.json.
+candidate fits each of the career roles defined in MongoDB (edited via
+the admin panel - see roles_repository.py).
 
 Scoring approach (weighted priority matching):
     Each required skill (technical or soft) carries a priority of
@@ -28,7 +28,7 @@ a FastAPI endpoint independently.
 import json
 from pathlib import Path
 
-DATA_PATH = Path(__file__).parent.parent / "data" / "career_roles.json"
+from roles_repository import fetch_all_roles
 
 # Numeric weight assigned to each priority level. Used both for scoring
 # and for ranking missing skills (higher weight = more important gap).
@@ -36,10 +36,8 @@ PRIORITY_WEIGHTS = {"high": 3, "medium": 2, "low": 1}
 
 
 def load_career_roles() -> list:
-    """Loads the list of role definitions from career_roles.json."""
-    with open(DATA_PATH, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    return data["roles"]
+    """Loads the list of role definitions from MongoDB."""
+    return fetch_all_roles()
 
 
 def _score_category(matched_lower: set, skill_entries: list) -> dict:

@@ -5,8 +5,7 @@ FastAPI entry point for the SkillMatch AI microservice.
 
 Endpoints:
     GET  /health   - liveness check
-    GET  /roles    - full career_roles.json content (for the admin panel
-                      and dashboard to render role details/resources)
+    GET  /roles    - full role dataset, read live from MongoDB
     POST /analyze  - runs the full pipeline (extract -> score -> roadmap)
                       on submitted CV text
 
@@ -20,16 +19,12 @@ traffic to it - binding to 0.0.0.0 (not the 127.0.0.1 default) is
 required for the platform's proxy to reach the process at all.
 """
 
-import json
-from pathlib import Path
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from scripts.analyze_cv import analyze_cv
-
-ROLES_PATH = Path(__file__).parent / "data" / "career_roles.json"
+from scripts.roles_repository import fetch_all_roles
 
 app = FastAPI(
     title="SkillMatch AI Service",
@@ -65,8 +60,7 @@ def health():
 @app.get("/roles")
 def get_roles():
     """Returns the full role dataset (roles, skills, resources, projects)."""
-    with open(ROLES_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+    return {"roles": fetch_all_roles()}
 
 
 @app.post("/analyze")

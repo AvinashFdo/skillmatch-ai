@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import AnalysisResults from "../components/AnalysisResults";
@@ -50,6 +50,9 @@ export default function DashboardPage() {
         <h1>SkillMatch AI Dashboard</h1>
         <div>
           <span className="welcome-text">Welcome, {user?.name}</span>
+          <Link to="/admin" className="admin-link">
+            Admin
+          </Link>
           <button
             className="logout-button"
             onClick={() => {

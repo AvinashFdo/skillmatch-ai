@@ -2,20 +2,23 @@
 skill_extractor.py
 ------------------
 Extracts technical and soft skills from CV text by matching against the
-career_roles.json skill dictionary. Uses spaCy for text preprocessing
-(tokenization, lemmatization) and simple phrase matching against known skills.
+skill dictionary drawn from every role in MongoDB. Uses spaCy for text
+preprocessing (tokenization, lemmatization) and simple phrase matching
+against known skills.
 
-This module is intentionally kept dependency-light and testable on its own,
-without needing the backend or frontend running.
+Role data (and therefore the skill dictionary) now lives in MongoDB,
+edited via the admin panel, rather than in the original
+career_roles.json file - see roles_repository.py. This module is no
+longer fully standalone: running its __main__ block now requires a
+working MONGODB_URI, unlike before.
 """
 
-import json
 import re
 from pathlib import Path
 
 import spacy
 
-DATA_PATH = Path(__file__).parent.parent / "data" / "career_roles.json"
+from roles_repository import fetch_all_roles
 
 # Load spaCy's small English model once
 nlp = spacy.load("en_core_web_sm")
@@ -27,11 +30,8 @@ def load_skill_dictionary():
     de-duplicated set. This becomes our master 'known skills' vocabulary
     for extraction, regardless of which role the student targets later.
     """
-    with open(DATA_PATH, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
     all_skills = set()
-    for role in data["roles"]:
+    for role in fetch_all_roles():
         for skill_entry in role["technical_skills"]:
             all_skills.add(skill_entry["skill"])
         for skill_entry in role["soft_skills"]:
