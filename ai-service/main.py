@@ -4,10 +4,12 @@ main.py
 FastAPI entry point for the SkillMatch AI microservice.
 
 Endpoints:
-    GET  /health   - liveness check
-    GET  /roles    - full role dataset, read live from MongoDB
-    POST /analyze  - runs the full pipeline (extract -> score -> roadmap)
-                      on submitted CV text
+    GET  /health        - liveness check
+    GET  /roles         - full role dataset, read live from MongoDB
+    POST /analyze       - runs the full pipeline (extract -> score ->
+                           roadmap) on submitted CV text
+    POST /analyze-file   - same pipeline, but takes an uploaded PDF/DOCX
+                           file instead of raw text
 
 Run locally with:
     uvicorn main:app --reload --port 8000
@@ -19,11 +21,12 @@ traffic to it - binding to 0.0.0.0 (not the 127.0.0.1 default) is
 required for the platform's proxy to reach the process at all.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from scripts.analyze_cv import analyze_cv
+from scripts.file_extractor import FileExtractionError, extract_text_from_file
 from scripts.roles_repository import fetch_all_roles
 
 app = FastAPI(
@@ -79,4 +82,24 @@ def analyze(request: AnalyzeRequest):
     except Exception as exc:
         # Any unexpected pipeline failure (bad dataset, extraction error,
         # etc.) is surfaced as a 500 rather than crashing the process.
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {exc}")
+
+
+@app.post("/analyze-file")
+async def analyze_file(file: UploadFile = File(...)):
+    """
+    Extracts plain text from an uploaded PDF/DOCX and runs it through
+    the exact same analyze_cv() pipeline /analyze uses - no duplicated
+    scoring/roadmap logic, just a different source of the raw CV text.
+    """
+    file_bytes = await file.read()
+
+    try:
+        cv_text = extract_text_from_file(file.filename or "", file_bytes)
+    except FileExtractionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    try:
+        return analyze_cv(cv_text)
+    except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {exc}")

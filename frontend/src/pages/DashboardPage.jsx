@@ -13,6 +13,9 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [completedSkills, setCompletedSkills] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [fileError, setFileError] = useState("");
+  const [fileLoading, setFileLoading] = useState(false);
 
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -56,6 +59,36 @@ export default function DashboardPage() {
       setError(err.response?.data?.error || "Analysis failed. Please try again.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleAnalyzeFile() {
+    setFileError("");
+    setResult(null);
+
+    if (!selectedFile) {
+      setFileError("Choose a PDF or DOCX file before analyzing.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    setFileLoading(true);
+    try {
+      const res = await apiClient.post("/cv/analyze-file", formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setResult(res.data);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        logout();
+        navigate("/login");
+        return;
+      }
+      setFileError(err.response?.data?.error || "File analysis failed. Please try again.");
+    } finally {
+      setFileLoading(false);
     }
   }
 
@@ -121,6 +154,17 @@ export default function DashboardPage() {
           {loading ? "Analyzing..." : "Analyze"}
         </button>
         {error && <p className="error-text">{error}</p>}
+
+        <h2 className="file-upload-heading">Or upload a CV file (PDF/DOCX)</h2>
+        <input
+          type="file"
+          accept=".pdf,.docx"
+          onChange={(e) => setSelectedFile(e.target.files[0] || null)}
+        />
+        <button onClick={handleAnalyzeFile} disabled={fileLoading}>
+          {fileLoading ? "Analyzing..." : "Analyze File"}
+        </button>
+        {fileError && <p className="error-text">{fileError}</p>}
       </section>
 
       {result && (

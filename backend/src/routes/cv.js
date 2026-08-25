@@ -1,10 +1,31 @@
 const crypto = require("crypto");
 const express = require("express");
 const axios = require("axios");
+const multer = require("multer");
+const FormData = require("form-data");
 const requireAuth = require("../middleware/auth");
 const CorrectionLog = require("../models/CorrectionLog");
 
 const router = express.Router();
+
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const ALLOWED_EXTENSIONS = [".pdf", ".docx"];
+
+// Holds the uploaded file in memory only (never written to disk) -
+// fine at this size cap, and simplest to immediately forward to the
+// AI service without a temp-file cleanup step.
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_FILE_SIZE_BYTES },
+  fileFilter: (req, file, cb) => {
+    const lowerName = file.originalname.toLowerCase();
+    const isAllowed = ALLOWED_EXTENSIONS.some((ext) => lowerName.endsWith(ext));
+    if (!isAllowed) {
+      return cb(new Error("Unsupported file type. Please upload a .pdf or .docx file."));
+    }
+    cb(null, true);
+  },
+});
 
 /**
  * POST /api/cv/analyze  (protected)
@@ -39,6 +60,52 @@ router.post("/analyze", requireAuth, async (req, res, next) => {
 
     next(err);
   }
+});
+
+/**
+ * POST /api/cv/analyze-file  (protected)
+ * Accepts a multipart file upload (.pdf/.docx, capped at 5MB), forwards
+ * it to the AI service's /analyze-file endpoint, and returns the same
+ * combined result shape as /analyze. Additive alongside the existing
+ * text-paste flow - that route is untouched.
+ */
+router.post("/analyze-file", requireAuth, (req, res, next) => {
+  upload.single("file")(req, res, async (err) => {
+    if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ error: "File is too large. Maximum size is 5MB." });
+    }
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "A file is required." });
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("file", req.file.buffer, { filename: req.file.originalname });
+
+      const aiResponse = await axios.post(
+        `${process.env.AI_SERVICE_URL}/analyze-file`,
+        formData,
+        { headers: formData.getHeaders() }
+      );
+      res.json(aiResponse.data);
+    } catch (aiErr) {
+      if (aiErr.code === "ECONNREFUSED") {
+        return res.status(503).json({
+          error: "AI service is unreachable. Is it running at " + process.env.AI_SERVICE_URL + "?",
+        });
+      }
+
+      if (aiErr.response) {
+        return res.status(aiErr.response.status).json(aiErr.response.data);
+      }
+
+      next(aiErr);
+    }
+  });
 });
 
 /**
