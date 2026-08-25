@@ -42,11 +42,16 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
+// Bind explicitly to 0.0.0.0 rather than relying on Node's default -
+// Railway/Render route external traffic to the container's exposed
+// port on all interfaces, and their proxy cannot reach a process bound
+// only to the loopback interface (127.0.0.1/"localhost").
+const HOST = "0.0.0.0";
 
 connectDB()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`SkillMatch backend listening on http://localhost:${PORT}`);
+    app.listen(PORT, HOST, () => {
+      console.log(`SkillMatch backend listening on ${HOST}:${PORT}`);
     });
   })
   .catch((err) => {
