@@ -77,6 +77,13 @@ export default function DashboardPage() {
     }
   }
 
+  async function handleAddCorrection(skill) {
+    // Fire-and-forget from the UI's perspective (AnalysisResults already
+    // shows the skill regardless) - just logs the correction. Throws on
+    // failure so AnalysisResults can show its own inline error.
+    await apiClient.post("/cv/correction", { skill, cv_text: cvText }, authHeaders);
+  }
+
   function handleGenerateReport() {
     navigate("/report", { state: { result, completedSkills, userName: user?.name } });
   }
@@ -122,6 +129,7 @@ export default function DashboardPage() {
             result={result}
             completedSkills={completedSkills}
             onToggleSkill={handleToggleSkill}
+            onAddCorrection={handleAddCorrection}
           />
           <button className="report-button" onClick={handleGenerateReport}>
             Generate Report

@@ -1,0 +1,66 @@
+{
+  "notes": "Ground truth skill annotations, manually created by the developer who authored each fictional sample CV. Used to calculate Precision, Recall, and F1-Score for the NLP skill extraction module, as committed in the ethics approval and requested by supervisor feedback. 'ground_truth_skills' lists skills that are genuinely present in the CV text (by meaning), regardless of whether the exact dictionary term is used verbatim - this is what a human reviewer would reasonably credit the candidate with.",
+
+  "annotations": [
+    {
+      "cv_file": "sample_cv_1.txt",
+      "profile": "Clean match - Frontend Developer",
+      "ground_truth_skills": [
+        "HTML", "CSS", "JavaScript", "React", "Git", "REST APIs",
+        "Responsive Design", "Attention to Detail", "Communication", "Teamwork"
+      ]
+    },
+    {
+      "cv_file": "sample_cv_2_backend.txt",
+      "profile": "Clean match - Backend Developer",
+      "ground_truth_skills": [
+        "Node.js", "Express.js", "MongoDB", "SQL", "REST APIs", "Git",
+        "Authentication", "API Design", "Problem Solving", "Logical Thinking",
+        "Communication"
+      ]
+    },
+    {
+      "cv_file": "sample_cv_3_data_analyst.txt",
+      "profile": "Clean match - Data Analyst",
+      "ground_truth_skills": [
+        "Python", "SQL", "Excel", "Pandas", "Data Visualization", "Statistics",
+        "Power BI", "Analytical Thinking", "Attention to Detail", "Communication"
+      ]
+    },
+    {
+      "cv_file": "sample_cv_4_qa_engineer.txt",
+      "profile": "Clean match - QA Engineer",
+      "ground_truth_skills": [
+        "Manual Testing", "Test Case Design", "Selenium", "Automation Testing",
+        "Bug Tracking Tools", "API Testing", "Git", "Attention to Detail",
+        "Analytical Thinking", "Communication"
+      ]
+    },
+    {
+      "cv_file": "sample_cv_5_fullstack.txt",
+      "profile": "Ambiguous - Full Stack (overlapping Frontend + Backend)",
+      "ground_truth_skills": [
+        "HTML", "CSS", "JavaScript", "React", "Node.js", "Express.js", "SQL",
+        "MongoDB", "Git", "REST APIs", "Responsive Design", "Authentication",
+        "Communication", "Problem Solving", "Attention to Detail"
+      ]
+    },
+    {
+      "cv_file": "sample_cv_6_uncommon_phrasing.txt",
+      "profile": "Tricky - uncommon abbreviations/phrasing (JS, Postgres, Mongo, ExpressJS, RESTful services)",
+      "ground_truth_skills": [
+        "JavaScript", "Node.js", "Express.js", "SQL", "MongoDB", "API Design",
+        "Git", "REST APIs", "Logical Thinking", "Problem Solving", "Communication"
+      ],
+      "note": "This CV intentionally uses abbreviations/synonyms (JS, Node, ExpressJS, Postgres, Mongo, RESTful services) instead of exact dictionary terms, to test whether the extractor's exact-match approach fails on real-world phrasing variation."
+    },
+    {
+      "cv_file": "sample_cv_7_sparse.txt",
+      "profile": "Sparse/weak - vague soft-skill language, minimal concrete technical skills",
+      "ground_truth_skills": [
+        "Communication", "Teamwork"
+      ],
+      "note": "This CV deliberately contains almost no concrete, named technical skills, and describes soft skills in vague/paraphrased language (e.g. 'quick learner', 'hard working') rather than dictionary terms. Used to test extractor behavior on a low-signal, realistic weak CV."
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+JANE DOE
+Aspiring Backend Developer
+
+SUMMARY
+Final year IT undergraduate with a strong interest in server-side development
+and building reliable APIs. Enjoys solving logical problems and working with
+databases to power real applications.
+
+TECHNICAL SKILLS
+Node.js, Express.js, SQL, MongoDB, REST APIs, Git, Authentication, API Design
+
+SOFT SKILLS
+Strong problem solving ability, logical thinking, and good communication with
+team members during collaborative projects.
+
+EDUCATION
+BSc (Hons) Software Engineering — Final Year
+Expected Graduation: 2026
+
+PROJECTS
+1. Task Management REST API
+   Built a REST API using Node.js and Express.js for a task management
+   application, with full CRUD endpoints and JWT-based authentication.
+   Used MongoDB to store user and task data.
+
+2. E-Commerce Backend Service
+   Developed a simple e-commerce backend with product and order endpoints
+   using Express.js and SQL for relational data storage. Implemented basic
+   API design principles for clean, RESTful routes.
+
+3. Library Management System
+   Created a backend system for managing books and borrowers, using Node.js
+   and MongoDB. Included authentication so only registered users could
+   borrow books, and used Git for version control throughout.
+
+EXPERIENCE
+University Coursework Projects
+Completed multiple database-driven backend projects as part of coursework,
+focusing on API design, authentication, and working with both SQL and
+MongoDB databases.
+
+CERTIFICATIONS
+- Node.js Fundamentals (self-paced online course)

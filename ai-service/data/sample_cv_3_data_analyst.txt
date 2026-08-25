@@ -1,0 +1,44 @@
+SARAH CHEN
+Aspiring Data Analyst
+
+SUMMARY
+Final year IT undergraduate with a keen interest in working with data to
+uncover insights and support decision-making. Comfortable working with
+spreadsheets, databases, and visualization tools to tell a clear story
+from raw numbers.
+
+TECHNICAL SKILLS
+Python, SQL, Excel, Pandas, Data Visualization, Statistics, Power BI
+
+SOFT SKILLS
+Strong analytical thinking, attention to detail, and clear communication
+when presenting findings to others.
+
+EDUCATION
+BSc (Hons) Software Engineering — Final Year
+Expected Graduation: 2026
+
+PROJECTS
+1. Retail Sales Analysis
+   Performed exploratory data analysis on a public retail sales dataset
+   using Python and Pandas. Cleaned the data, identified sales trends,
+   and created visualizations to summarize key findings.
+
+2. Student Performance Dashboard
+   Built an interactive dashboard using Power BI to visualize student
+   performance data across multiple subjects, highlighting patterns using
+   basic statistics and data visualization techniques.
+
+3. Customer Survey Data Report
+   Used SQL to query and aggregate customer survey responses stored in a
+   database, then used Excel to build summary charts and present the
+   results in a short report.
+
+EXPERIENCE
+University Coursework Projects
+Worked on several data-focused coursework assignments, including cleaning
+messy datasets, writing SQL queries for analysis, and presenting findings
+using clear visualizations.
+
+CERTIFICATIONS
+- Introduction to Data Analysis with Python (self-paced online course)

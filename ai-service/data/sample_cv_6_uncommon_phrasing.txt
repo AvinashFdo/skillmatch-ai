@@ -1,0 +1,41 @@
+DAVID OKAFOR
+Aspiring Backend Developer
+
+SUMMARY
+Final year IT undergraduate with hands-on experience building server-side
+applications and working with databases. Comfortable picking up new tools
+and frameworks quickly.
+
+TECHNICAL SKILLS
+JS, Node, ExpressJS, Postgres, Mongo, API design, version control (Git),
+RESTful services
+
+SOFT SKILLS
+Strong logical thinker, good at solving tricky problems, and communicates
+clearly with teammates during projects.
+
+EDUCATION
+BSc (Hons) Software Engineering — Final Year
+Expected Graduation: 2026
+
+PROJECTS
+1. Inventory Management API
+   Built a RESTful service using ExpressJS and Node for managing inventory
+   records, with Postgres as the underlying relational store.
+
+2. Notes App Backend
+   Developed a backend for a simple notes application using Mongo as the
+   database, with JS handling the core application logic.
+
+3. User Auth Microservice
+   Created a small microservice handling user login and signup, exposing
+   RESTful services for the rest of the application to consume.
+
+EXPERIENCE
+University Coursework Projects
+Completed backend-focused coursework involving API design, database
+integration with both relational and non-relational stores, and version
+control using Git for all project work.
+
+CERTIFICATIONS
+- Backend Development with Node (self-paced online course)

@@ -1,0 +1,44 @@
+MICHAEL TAN
+Aspiring QA Engineer
+
+SUMMARY
+Final year IT undergraduate with a strong interest in software quality and
+testing. Enjoys finding edge cases, writing clear test cases, and ensuring
+applications work reliably before release.
+
+TECHNICAL SKILLS
+Manual Testing, Test Case Design, Bug Tracking Tools, Selenium, API Testing,
+Git
+
+SOFT SKILLS
+High attention to detail, analytical thinking, and clear communication when
+reporting issues to development teams.
+
+EDUCATION
+BSc (Hons) Software Engineering — Final Year
+Expected Graduation: 2026
+
+PROJECTS
+1. Test Plan for a Student Portal Web App
+   Designed a full test plan and detailed test cases for a sample student
+   portal web application, covering login, registration, and course
+   enrollment flows using manual testing techniques.
+
+2. Automated Login Test Suite
+   Built an automated test suite using Selenium to verify the login flow
+   of a sample web application, including valid and invalid credential
+   scenarios and basic regression checks.
+
+3. API Testing for a Task Manager App
+   Performed API testing on a sample task manager application's REST
+   endpoints, verifying correct responses for valid and invalid requests
+   and logging issues using a bug tracking tool.
+
+EXPERIENCE
+University Coursework Projects
+Contributed to coursework projects by designing test cases, performing
+manual testing on classmates' applications, and documenting bugs found
+during testing sessions using Git for tracking test scripts.
+
+CERTIFICATIONS
+- Software Testing Fundamentals (self-paced online course)

@@ -270,6 +270,39 @@ button {
   font-size: 0.75rem;
 }
 
+.tag-manual {
+  background: #eafbea;
+  color: #1a7f37;
+}
+
+.tag-manual em {
+  font-style: normal;
+  opacity: 0.7;
+  font-size: 0.75rem;
+}
+
+.correction-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.correction-form input {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #cbd2d9;
+  border-radius: 6px;
+}
+
+.correction-form button {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  background: white;
+  color: #2563eb;
+  font-weight: 600;
+}
+
 .role-fit-list {
   display: flex;
   flex-direction: column;

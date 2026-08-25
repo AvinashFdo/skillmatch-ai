@@ -1,0 +1,43 @@
+PRIYA MENON
+Aspiring Full Stack Developer
+
+SUMMARY
+Final year IT undergraduate with experience across both frontend and
+backend development. Enjoys building complete web applications from
+the user interface down to the database layer.
+
+TECHNICAL SKILLS
+HTML, CSS, JavaScript, React, Node.js, Express.js, SQL, MongoDB, Git,
+REST APIs, Responsive Design, Authentication
+
+SOFT SKILLS
+Good communication, problem solving, and attention to detail when
+working across the full stack of an application.
+
+EDUCATION
+BSc (Hons) Software Engineering — Final Year
+Expected Graduation: 2026
+
+PROJECTS
+1. Full Stack Task Manager
+   Built a complete task management application with a React frontend,
+   an Express.js REST API backend, and MongoDB for data storage. Handled
+   authentication for user accounts.
+
+2. Personal Blog Platform
+   Developed a blog platform using HTML, CSS, and JavaScript for the
+   frontend, with a Node.js backend and SQL database for storing posts
+   and comments.
+
+3. Responsive E-Commerce Prototype
+   Created a responsive e-commerce prototype covering both frontend
+   design and backend REST API integration for product listings.
+
+EXPERIENCE
+University Coursework Projects
+Worked on several full stack coursework projects combining frontend
+frameworks with backend APIs and databases, using Git throughout for
+version control.
+
+CERTIFICATIONS
+- Full Stack Web Development Fundamentals (self-paced online course)
