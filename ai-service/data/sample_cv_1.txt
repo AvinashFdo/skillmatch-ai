@@ -1,0 +1,35 @@
+JOHN SAMPLE
+Aspiring Frontend Developer
+
+SUMMARY
+Final year IT undergraduate with hands-on experience building responsive web applications.
+Passionate about clean UI design and writing maintainable JavaScript code.
+
+TECHNICAL SKILLS
+HTML, CSS, JavaScript, React, Git, REST APIs, Responsive Design, Bootstrap
+
+SOFT SKILLS
+Strong communication skills, attention to detail, and enjoy working in a team environment.
+
+EDUCATION
+BSc (Hons) Software Engineering — Final Year
+Expected Graduation: 2026
+
+PROJECTS
+1. Personal Portfolio Website
+   Built a responsive personal portfolio using HTML, CSS, and JavaScript. Deployed using GitHub Pages.
+
+2. Task Manager Web App
+   Developed a task management application using React for the frontend, with REST API integration
+   to a mock backend. Used Git for version control throughout development.
+
+3. Weather Dashboard
+   Created a weather dashboard application that fetches live data from a public REST API and displays
+   it using React components. Focused on responsive design for mobile and desktop views.
+
+EXPERIENCE
+Freelance Web Developer (Part-time)
+Built simple responsive websites for two small local businesses using HTML, CSS and JavaScript.
+
+CERTIFICATIONS
+- Responsive Web Design Certification (self-paced online course)

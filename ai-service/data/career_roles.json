@@ -1,0 +1,139 @@
+{
+  "meta": {
+    "version": "1.0",
+    "last_updated": "2026-08-19",
+    "notes": "Skill lists drafted from general industry knowledge of role requirements. Source citations (job postings, dates accessed) to be added by student where time permits, as noted in dissertation methodology."
+  },
+  "roles": [
+    {
+      "role_id": "frontend_developer",
+      "role_name": "Frontend Developer",
+      "description": "Builds user-facing web interfaces and ensures responsive, accessible, and performant design.",
+      "technical_skills": [
+        { "skill": "HTML", "priority": "high" },
+        { "skill": "CSS", "priority": "high" },
+        { "skill": "JavaScript", "priority": "high" },
+        { "skill": "React", "priority": "high" },
+        { "skill": "Responsive Design", "priority": "high" },
+        { "skill": "Git", "priority": "medium" },
+        { "skill": "REST APIs", "priority": "medium" },
+        { "skill": "Browser DevTools", "priority": "medium" },
+        { "skill": "Sass", "priority": "low" },
+        { "skill": "TypeScript", "priority": "low" },
+        { "skill": "Webpack", "priority": "low" },
+        { "skill": "Accessibility", "priority": "low" }
+      ],
+      "soft_skills": [
+        { "skill": "Attention to Detail", "priority": "medium" },
+        { "skill": "Communication", "priority": "medium" },
+        { "skill": "Teamwork", "priority": "medium" },
+        { "skill": "Creativity", "priority": "low" }
+      ],
+      "learning_resources": [
+        { "title": "The Odin Project - Foundations", "url": "https://www.theodinproject.com/" },
+        { "title": "React Official Docs", "url": "https://react.dev/" }
+      ],
+      "portfolio_projects": [
+        "Responsive portfolio website using HTML/CSS/JS",
+        "Weather app using a public REST API and React"
+      ]
+    },
+    {
+      "role_id": "backend_developer",
+      "role_name": "Backend Developer",
+      "description": "Builds and maintains server-side logic, APIs, and database interactions that power applications.",
+      "technical_skills": [
+        { "skill": "Node.js", "priority": "high" },
+        { "skill": "Express.js", "priority": "high" },
+        { "skill": "SQL", "priority": "high" },
+        { "skill": "REST APIs", "priority": "high" },
+        { "skill": "Authentication", "priority": "medium" },
+        { "skill": "Git", "priority": "medium" },
+        { "skill": "MongoDB", "priority": "medium" },
+        { "skill": "API Design", "priority": "medium" },
+        { "skill": "Docker", "priority": "low" },
+        { "skill": "Redis", "priority": "low" },
+        { "skill": "Microservices", "priority": "low" },
+        { "skill": "Unit Testing", "priority": "low" }
+      ],
+      "soft_skills": [
+        { "skill": "Problem Solving", "priority": "high" },
+        { "skill": "Logical Thinking", "priority": "medium" },
+        { "skill": "Communication", "priority": "medium" },
+        { "skill": "Time Management", "priority": "low" }
+      ],
+      "learning_resources": [
+        { "title": "Node.js Official Docs", "url": "https://nodejs.org/en/docs" },
+        { "title": "REST API Design Best Practices", "url": "https://restfulapi.net/" }
+      ],
+      "portfolio_projects": [
+        "REST API for a to-do list app with authentication",
+        "Simple e-commerce backend with product & order endpoints"
+      ]
+    },
+    {
+      "role_id": "data_analyst",
+      "role_name": "Data Analyst",
+      "description": "Analyses datasets to extract insights, identify trends, and support data-driven business decisions.",
+      "technical_skills": [
+        { "skill": "Python", "priority": "high" },
+        { "skill": "SQL", "priority": "high" },
+        { "skill": "Excel", "priority": "high" },
+        { "skill": "Data Visualization", "priority": "high" },
+        { "skill": "Pandas", "priority": "medium" },
+        { "skill": "Statistics", "priority": "medium" },
+        { "skill": "Data Cleaning", "priority": "medium" },
+        { "skill": "Power BI", "priority": "low" },
+        { "skill": "Tableau", "priority": "low" },
+        { "skill": "NumPy", "priority": "low" },
+        { "skill": "A/B Testing", "priority": "low" }
+      ],
+      "soft_skills": [
+        { "skill": "Analytical Thinking", "priority": "high" },
+        { "skill": "Attention to Detail", "priority": "medium" },
+        { "skill": "Communication", "priority": "medium" },
+        { "skill": "Curiosity", "priority": "low" }
+      ],
+      "learning_resources": [
+        { "title": "Kaggle Learn - Pandas", "url": "https://www.kaggle.com/learn/pandas" },
+        { "title": "Mode SQL Tutorial", "url": "https://mode.com/sql-tutorial/" }
+      ],
+      "portfolio_projects": [
+        "Exploratory data analysis on a public dataset with visualizations",
+        "Sales dashboard using Power BI or Tableau"
+      ]
+    },
+    {
+      "role_id": "qa_engineer",
+      "role_name": "QA Engineer",
+      "description": "Designs and executes tests to ensure software quality, reliability, and adherence to requirements.",
+      "technical_skills": [
+        { "skill": "Manual Testing", "priority": "high" },
+        { "skill": "Test Case Design", "priority": "high" },
+        { "skill": "Bug Tracking Tools", "priority": "high" },
+        { "skill": "Automation Testing", "priority": "medium" },
+        { "skill": "Selenium", "priority": "medium" },
+        { "skill": "API Testing", "priority": "medium" },
+        { "skill": "Regression Testing", "priority": "medium" },
+        { "skill": "SQL", "priority": "low" },
+        { "skill": "Git", "priority": "low" },
+        { "skill": "Performance Testing", "priority": "low" },
+        { "skill": "Postman", "priority": "low" }
+      ],
+      "soft_skills": [
+        { "skill": "Attention to Detail", "priority": "high" },
+        { "skill": "Analytical Thinking", "priority": "medium" },
+        { "skill": "Communication", "priority": "medium" },
+        { "skill": "Patience", "priority": "low" }
+      ],
+      "learning_resources": [
+        { "title": "Selenium Official Docs", "url": "https://www.selenium.dev/documentation/" },
+        { "title": "Postman Learning Center", "url": "https://learning.postman.com/" }
+      ],
+      "portfolio_projects": [
+        "Test plan and test cases for a sample web application",
+        "Automated test suite using Selenium for a login flow"
+      ]
+    }
+  ]
+}
