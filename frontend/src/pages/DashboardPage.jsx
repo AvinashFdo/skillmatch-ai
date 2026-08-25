@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
@@ -12,6 +12,21 @@ export default function DashboardPage() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [completedSkills, setCompletedSkills] = useState([]);
+
+  const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
+
+  useEffect(() => {
+    // Restores checkbox state on load/refresh, so progress isn't tied
+    // to a single analyze session.
+    apiClient
+      .get("/user/me", authHeaders)
+      .then((res) => setCompletedSkills(res.data.completedSkills || []))
+      .catch(() => {
+        /* non-critical - checkboxes just start unchecked if this fails */
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleAnalyze() {
     setError("");
@@ -27,7 +42,7 @@ export default function DashboardPage() {
       const res = await apiClient.post(
         "/cv/analyze",
         { cv_text: cvText },
-        { headers: { Authorization: `Bearer ${token}` } }
+        authHeaders
       );
       setResult(res.data);
     } catch (err) {
@@ -42,6 +57,28 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleToggleSkill(skill) {
+    // Optimistic update so the checkbox feels instant; the PATCH
+    // response is the source of truth and overwrites this if different.
+    setCompletedSkills((prev) =>
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+    );
+
+    try {
+      const res = await apiClient.patch("/user/progress", { skill }, authHeaders);
+      setCompletedSkills(res.data.completedSkills);
+    } catch {
+      // Revert the optimistic update on failure.
+      setCompletedSkills((prev) =>
+        prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+      );
+    }
+  }
+
+  function handleGenerateReport() {
+    navigate("/report", { state: { result, completedSkills, userName: user?.name } });
   }
 
   return (
@@ -79,7 +116,18 @@ export default function DashboardPage() {
         {error && <p className="error-text">{error}</p>}
       </section>
 
-      {result && <AnalysisResults result={result} />}
+      {result && (
+        <>
+          <AnalysisResults
+            result={result}
+            completedSkills={completedSkills}
+            onToggleSkill={handleToggleSkill}
+          />
+          <button className="report-button" onClick={handleGenerateReport}>
+            Generate Report
+          </button>
+        </>
+      )}
     </div>
   );
 }

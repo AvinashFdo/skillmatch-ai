@@ -8,6 +8,7 @@ const authRoutes = require("./src/routes/auth");
 const cvRoutes = require("./src/routes/cv");
 const rolesRoutes = require("./src/routes/roles");
 const adminRolesRoutes = require("./src/routes/adminRoles");
+const userRoutes = require("./src/routes/user");
 const requireAuth = require("./src/middleware/auth");
 
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api/roles", rolesRoutes);
 // Protected by requireAuth only (any logged-in user), not a real admin
 // role check - see the limitation note in src/routes/adminRoles.js.
 app.use("/api/admin/roles", requireAuth, adminRolesRoutes);
+app.use("/api/user", requireAuth, userRoutes);
 
 // 404 handler for unknown routes
 app.use((req, res) => {

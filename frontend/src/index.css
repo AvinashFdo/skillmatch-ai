@@ -333,3 +333,63 @@ button {
 .priority-low {
   color: #3e4c59;
 }
+
+.readiness-progress {
+  font-weight: 600;
+  color: #1a7f37;
+  margin-top: -0.5rem;
+}
+
+.skill-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+.skill-done {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.report-button {
+  margin-top: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 6px;
+  background: #1a7f37;
+  color: white;
+  font-weight: 600;
+}
+
+/* ---------- Report page ---------- */
+
+.report-page {
+  background: white;
+}
+
+.report-page .no-print {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.report-page .no-print button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+}
+
+.report-meta {
+  color: #616e7c;
+  margin-top: -0.5rem;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

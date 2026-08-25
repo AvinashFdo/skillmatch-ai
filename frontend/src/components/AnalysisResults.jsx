@@ -1,9 +1,17 @@
 /**
  * Renders the full analyze_cv() response: extracted skills, role-fit
- * scores for all 4 roles, and the recommended role's roadmap.
+ * scores for all 4 roles, and the recommended role's roadmap - plus a
+ * checkbox per missing skill so the user can track progress, and a
+ * readiness % computed from how many of the top role's missing skills
+ * are marked complete.
  */
-export default function AnalysisResults({ result }) {
+export default function AnalysisResults({ result, completedSkills, onToggleSkill }) {
   const { extracted_skills: extractedSkills, role_fit: roleFit, recommended_role: roadmap } = result;
+
+  const allMissingSkills = roadmap.learning_order.flatMap((group) => group.skills);
+  const completedCount = allMissingSkills.filter((s) => completedSkills.includes(s.skill)).length;
+  const totalMissing = allMissingSkills.length;
+  const readinessPercent = totalMissing === 0 ? 100 : Math.round((completedCount / totalMissing) * 100);
 
   return (
     <div className="results">
@@ -30,6 +38,9 @@ export default function AnalysisResults({ result }) {
       <section>
         <h2>Recommended Role: {roadmap.role_name}</h2>
         <p className="readiness-summary">{roadmap.readiness_summary}</p>
+        <p className="readiness-progress">
+          Readiness: {readinessPercent}% ({completedCount} of {totalMissing} skills completed)
+        </p>
 
         <h3>Learning Order</h3>
         {roadmap.learning_order.length === 0 ? (
@@ -41,11 +52,21 @@ export default function AnalysisResults({ result }) {
                 {group.priority} priority
               </h4>
               <div className="tag-list">
-                {group.skills.map((s) => (
-                  <span className="tag tag-missing" key={s.skill}>
-                    {s.skill} <em>({s.category})</em>
-                  </span>
-                ))}
+                {group.skills.map((s) => {
+                  const isDone = completedSkills.includes(s.skill);
+                  return (
+                    <label className="tag tag-missing skill-checkbox" key={s.skill}>
+                      <input
+                        type="checkbox"
+                        checked={isDone}
+                        onChange={() => onToggleSkill(s.skill)}
+                      />
+                      <span className={isDone ? "skill-done" : ""}>
+                        {s.skill} <em>({s.category})</em>
+                      </span>
+                    </label>
+                  );
+                })}
               </div>
             </div>
           ))

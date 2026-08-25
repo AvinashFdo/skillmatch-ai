@@ -21,6 +21,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true, // bcrypt hash, not plaintext
   },
+  // Skill names the user has marked as done, toward whichever role's
+  // roadmap they were viewing at the time. Deliberately just a flat
+  // list of strings, not tied to a specific role or a separate
+  // collection - the frontend recalculates readiness against whatever
+  // role is currently displayed by intersecting this list with that
+  // role's missing skills.
+  completedSkills: {
+    type: [String],
+    default: [],
+  },
   createdAt: {
     type: Date,
     default: Date.now,
