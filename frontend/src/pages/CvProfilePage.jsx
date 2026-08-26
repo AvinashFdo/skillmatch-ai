@@ -24,7 +24,7 @@ import useAnalysis from "../hooks/useAnalysis";
 export default function CvProfilePage() {
   const { token, logout } = useAuth();
   const navigate = useNavigate();
-  const { setResult, profile, updateProfile, loading } = useAnalysis();
+  const { result, setResult, profile, updateProfile, resetAnalysis, loading } = useAnalysis();
 
   const [cvText, setCvText] = useState("");
   const [error, setError] = useState("");
@@ -32,6 +32,9 @@ export default function CvProfilePage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileError, setFileError] = useState("");
   const [fileAnalyzing, setFileAnalyzing] = useState(false);
+
+  const [resetting, setResetting] = useState(false);
+  const [resetError, setResetError] = useState("");
 
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({ programme: "", year: "", studyHoursPerWeek: "" });
@@ -135,6 +138,32 @@ export default function CvProfilePage() {
     }
   }
 
+  async function handleResetAnalysis() {
+    const confirmed = window.confirm(
+      "This will clear your current analysis and progress. Your profile details will be kept. Continue?"
+    );
+    if (!confirmed) return;
+
+    setResetError("");
+    setResetting(true);
+    try {
+      await resetAnalysis();
+      setCvText("");
+      setSelectedFile(null);
+      setError("");
+      setFileError("");
+    } catch (err) {
+      if (err.response?.status === 401) {
+        logout();
+        navigate("/login");
+        return;
+      }
+      setResetError(err.response?.data?.error || "Could not clear your analysis. Please try again.");
+    } finally {
+      setResetting(false);
+    }
+  }
+
   return (
     <div className="app-shell">
       <Sidebar active="CV & Profile" />
@@ -215,6 +244,22 @@ export default function CvProfilePage() {
                   </div>
                 </form>
               )}
+            </section>
+          )}
+
+          {!loading && result && (
+            <section className="card reset-analysis-card">
+              <div className="card-title">Start fresh</div>
+              <p>
+                Clear your current analysis and progress to analyze a new CV from scratch. Your profile
+                details (Programme, Year, Study time) are kept.
+              </p>
+              <div style={{ marginTop: 10 }}>
+                <button className="btn" onClick={handleResetAnalysis} disabled={resetting}>
+                  {resetting ? "Clearing..." : "Start fresh with a new CV"}
+                </button>
+              </div>
+              {resetError && <p className="error-text">{resetError}</p>}
             </section>
           )}
 

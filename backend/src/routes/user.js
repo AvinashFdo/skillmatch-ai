@@ -100,6 +100,35 @@ router.get("/analysis", async (req, res, next) => {
 });
 
 /**
+ * DELETE /api/user/analysis
+ * "Start fresh" - clears the logged-in user's lastAnalysis (back to
+ * null) and completedSkills (back to an empty array), so the next visit
+ * to any of the Dashboard/Skills/Roles/Roadmap/Report pages correctly
+ * shows their "no analysis yet" empty state instead of stale results
+ * from a CV the student wants to move on from.
+ *
+ * Deliberately does NOT touch programme/year/studyHoursPerWeek - those
+ * describe the student, not a specific CV/analysis, so there's no
+ * reason to lose them just because the student wants to re-analyze.
+ */
+router.delete("/analysis", async (req, res, next) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.user.userId,
+      { lastAnalysis: null, completedSkills: [] },
+      { new: true }
+    );
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    res.json({ message: "Analysis and progress cleared." });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * PATCH /api/user/progress
  * Toggles a single skill name in the user's completedSkills array -
  * adds it if not present, removes it if already there. Returns the

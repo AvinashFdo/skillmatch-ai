@@ -19,6 +19,13 @@ import { useAuth } from "../context/AuthContext";
  * studyHoursPerWeek) from the same /user/me call rather than a separate
  * request - Dashboard's profile panel and Roadmap's time estimate both
  * need it, and /user/me already returns it now.
+ *
+ * resetAnalysis() ("Start fresh") clears result/completedSkills both
+ * server-side (DELETE /user/analysis) and in this hook's local state
+ * immediately, rather than waiting for a refetch - lets the calling
+ * page (CvProfilePage) drop straight back into its empty/ready-for-a-
+ * new-CV state without a round-trip delay. profile is untouched, by
+ * design - it describes the student, not a specific analysis.
  */
 export default function useAnalysis() {
   const { token, logout } = useAuth();
@@ -110,6 +117,13 @@ export default function useAnalysis() {
     setProfile((prev) => ({ ...prev, ...res.data }));
   }
 
+  async function resetAnalysis() {
+    await apiClient.delete("/user/analysis", authHeaders);
+    setResult(null);
+    setCompletedSkills([]);
+    setInitialCompletedSkills([]);
+  }
+
   async function addCorrection(skill) {
     // cv_text is intentionally omitted here - the raw pasted text only
     // ever lived in Dashboard's local component state and was never
@@ -129,6 +143,7 @@ export default function useAnalysis() {
     updateProfile,
     loading,
     toggleSkill,
+    resetAnalysis,
     addCorrection,
     handleAuthError,
   };

@@ -406,6 +406,21 @@ a:hover {
   gap: 14px;
 }
 
+/* "Start fresh" is destructive-ish (clears analysis + progress), so it
+   gets a subtle warning-toned left border to set it apart from a
+   regular card, without introducing a whole new alert-style component
+   for one button - reuses the same tone already used for high-priority
+   roadmap items rather than a new color. */
+.reset-analysis-card {
+  border-left: 3px solid var(--color-high-fill);
+}
+
+.reset-analysis-card p {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
 .card-title {
   font-size: 13.5px;
   font-weight: 600;
