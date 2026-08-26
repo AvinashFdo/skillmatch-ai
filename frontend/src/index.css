@@ -148,6 +148,21 @@ a:hover {
 
 .btn:hover:not(:disabled) {
   border-color: var(--color-text);
+  /* Several .btn/.btn-primary buttons are react-router <Link>s (render
+     as <a>), not <button>s - e.g. Dashboard's "Upload new CV". The
+     global `a:hover { color: ... }` rule (index.css ~line 111) has
+     higher specificity than the plain `.btn`/`.btn-primary` color
+     rules, so without an explicit color here a hovered Link-based
+     button silently picks up the link hover color instead of keeping
+     its own - harmless for the outlined .btn (still readable against
+     its light background), but on .btn-primary it happened to exactly
+     match the hover background color below, making the label
+     disappear. Re-asserting color here (same specificity as the rule
+     below, but after it in source order - CSS-safe either way since
+     .btn-primary's own color rule underneath still wins on specificity
+     for that case) keeps ALL .btn buttons' hover text color identical
+     regardless of whether they're rendered as <button> or <a>. */
+  color: var(--color-text-secondary);
 }
 
 .btn-primary {
@@ -160,6 +175,15 @@ a:hover {
 .btn-primary:hover:not(:disabled) {
   background: var(--color-accent-hover);
   border-color: var(--color-accent-hover);
+  /* The actual fix: without this, a <Link>-rendered .btn-primary (an
+     <a> element) hovers into having its TEXT color pulled to
+     --color-accent-hover by the global a:hover rule above, which is
+     the exact same value used for the BACKGROUND right above this line
+     - text becomes invisible against its own background. Explicitly
+     keeping it white on hover, same as the non-hover state, fixes this
+     for every .btn-primary regardless of whether it's a <button> or an
+     <a> underneath. */
+  color: #fff;
 }
 
 .btn:disabled {
@@ -419,6 +443,68 @@ a:hover {
   font-size: 13px;
   color: var(--color-text-secondary);
   line-height: 1.6;
+}
+
+/* Dashboard "Next actions" panel (FIG 02 pattern) - a read-only preview
+   of the top few incomplete missing skills. Deliberately static (no
+   real <input type="checkbox">, just a styled square) since toggling
+   progress is /roadmap's job, not Dashboard's - this is a summary, not
+   another place to edit state from. */
+.next-actions-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.next-actions-row {
+  padding: 13px 0;
+  border-bottom: 1px solid var(--color-border-hairline);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.next-actions-row:last-child {
+  border-bottom: none;
+}
+
+.next-actions-checkbox {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  margin-top: 2px;
+  border: 1px solid var(--color-muted-bar);
+  background: var(--color-surface);
+}
+
+.next-actions-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.next-actions-skill {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.next-actions-priority {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+}
+
+.next-actions-priority-high {
+  color: var(--color-high);
+}
+
+.next-actions-priority-medium {
+  color: var(--color-medium);
+}
+
+.next-actions-priority-low {
+  color: var(--color-text-muted);
 }
 
 .card-title {

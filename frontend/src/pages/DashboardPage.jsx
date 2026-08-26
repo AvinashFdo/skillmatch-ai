@@ -5,6 +5,9 @@ import { computeAnalysisStats } from "../utils/analysisStats";
 
 const ROLE_PREVIEW_COUNT = 5;
 
+const NEXT_ACTIONS_COUNT = 3;
+const PRIORITY_LABELS = { high: "HIGH PRIORITY", medium: "MEDIUM PRIORITY", low: "LOW PRIORITY" };
+
 /**
  * Overview/landing page - matches design_reference.html's actual
  * Dashboard (FIG 02) more precisely than the earlier version of this
@@ -14,18 +17,31 @@ const ROLE_PREVIEW_COUNT = 5;
  * Profile" page. Moved both of them out to CvProfilePage.jsx
  * accordingly - this page is now purely a summary + navigation hub:
  * the 4 stat cards, a top-5 role-fit preview (linking to the full
- * table on /roles), and links into the other pages.
+ * table on /roles), a "Next actions" panel, and links into the other
+ * pages.
  *
- * The reference's Dashboard also has "next actions"/"activity" widgets
- * that aren't reproduced here - explicitly out of scope per the task
- * that introduced this restructure, since they'd need new data this
- * app doesn't track (e.g. an actual activity log).
+ * The reference's Dashboard also has an "Activity" feed - deliberately
+ * NOT reproduced here, still out of scope: it would need a real event-
+ * logging system this app doesn't have yet (see CLAUDE_LOG.md).
+ * "Next actions" doesn't have that problem - it's just a derived view
+ * over data the app already has (the current roadmap's missing skills +
+ * completedSkills), the same two inputs computeAnalysisStats already
+ * combines for the ROADMAP TASKS stat card.
  */
 export default function DashboardPage() {
   const { result, completedSkills, loading } = useAnalysis();
   const stats = computeAnalysisStats(result, completedSkills);
   const hasResult = Boolean(result);
   const roleFitPreview = (result?.role_fit || []).slice(0, ROLE_PREVIEW_COUNT);
+  // allMissingSkills is already ordered high -> medium -> low (see
+  // analysisStats.js - built from roadmap.learning_order, which the AI
+  // service returns grouped by priority tier in that order, the same
+  // ordering /roadmap's own priority cards render in) - filtering out
+  // completed skills and taking the first 3 preserves that ordering,
+  // no separate sort needed.
+  const nextActions = stats.allMissingSkills
+    .filter((s) => !completedSkills.includes(s.skill))
+    .slice(0, NEXT_ACTIONS_COUNT);
 
   return (
     <div className="app-shell">
@@ -37,6 +53,13 @@ export default function DashboardPage() {
             <div className="app-topbar-title">Dashboard</div>
             <div className="app-topbar-subtitle">Your career readiness at a glance</div>
           </div>
+          {!loading && hasResult && (
+            <div className="app-topbar-actions">
+              <Link to="/cv-profile" className="btn btn-primary">
+                Upload new CV
+              </Link>
+            </div>
+          )}
         </header>
 
         <div className="app-content">
@@ -105,10 +128,12 @@ export default function DashboardPage() {
           {!loading && !hasResult && (
             <section className="card">
               <div className="card-title">No analysis yet</div>
-              <p>
-                Head to <Link to="/cv-profile">CV &amp; Profile</Link> to paste your CV text or upload a
-                file and get your first readiness score.
-              </p>
+              <p>Paste your CV text or upload a file to get your first readiness score.</p>
+              <div>
+                <Link to="/cv-profile" className="btn btn-primary">
+                  Get started
+                </Link>
+              </div>
             </section>
           )}
 
@@ -149,6 +174,31 @@ export default function DashboardPage() {
                 </span>
                 <Link to="/roles">See all role matches</Link>
               </div>
+            </section>
+          )}
+
+          {!loading && hasResult && (
+            <section className="card next-actions-card">
+              <div className="card-title">Next actions</div>
+              {nextActions.length === 0 ? (
+                <p className="fully-matched-banner">
+                  All caught up - every missing skill for {stats.roadmap.role_name} is marked complete.
+                </p>
+              ) : (
+                <div className="next-actions-list">
+                  {nextActions.map((s) => (
+                    <div className="next-actions-row" key={s.skill}>
+                      <span className="next-actions-checkbox" aria-hidden="true" />
+                      <div className="next-actions-label">
+                        <span className="next-actions-skill">{s.skill}</span>
+                        <span className={`next-actions-priority next-actions-priority-${s.priority}`}>
+                          {PRIORITY_LABELS[s.priority]}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
