@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import Sidebar from "../components/Sidebar";
 
 // Deliberately simple text formats instead of nested add/remove-row
 // forms, per the "minimal/fast, no polish" scope for this admin panel:
@@ -182,115 +183,127 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>Admin - Manage Roles</h1>
-        <Link to="/dashboard">Back to Dashboard</Link>
-      </header>
+    <div className="app-shell">
+      <Sidebar active="Admin" />
 
-      {error && <p className="error-text">{error}</p>}
-
-      <section className="upload-section">
-        <h2>{editingId ? "Edit Role" : "Add New Role"}</h2>
-        <form onSubmit={handleSubmit} className="admin-form">
-          <label>
-            Role Name
-            <input
-              value={form.role_name}
-              onChange={(e) => setForm({ ...form, role_name: e.target.value })}
-              required
-            />
-          </label>
-
-          <label>
-            Description
-            <input
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-            />
-          </label>
-
-          <label>
-            Technical Skills (one "Skill: priority" per line - priority is high/medium/low)
-            <textarea
-              value={form.technical_skills}
-              onChange={(e) => setForm({ ...form, technical_skills: e.target.value })}
-              rows={5}
-              placeholder={"Docker: high\nKubernetes: high\nLinux: medium"}
-            />
-          </label>
-
-          <label>
-            Soft Skills (one "Skill: priority" per line)
-            <textarea
-              value={form.soft_skills}
-              onChange={(e) => setForm({ ...form, soft_skills: e.target.value })}
-              rows={3}
-              placeholder={"Problem Solving: high\nCommunication: medium"}
-            />
-          </label>
-
-          <label>
-            Learning Resources (one "Title|URL" per line)
-            <textarea
-              value={form.learning_resources}
-              onChange={(e) => setForm({ ...form, learning_resources: e.target.value })}
-              rows={2}
-              placeholder="Docker Docs|https://docs.docker.com/"
-            />
-          </label>
-
-          <label>
-            Portfolio Projects (one per line)
-            <textarea
-              value={form.portfolio_projects}
-              onChange={(e) => setForm({ ...form, portfolio_projects: e.target.value })}
-              rows={2}
-              placeholder="Set up a CI/CD pipeline for a sample app"
-            />
-          </label>
-
-          <div>
-            <button type="submit">{editingId ? "Save Changes" : "Add Role"}</button>
-            {editingId && (
-              <button type="button" onClick={cancelEdit}>
-                Cancel
-              </button>
-            )}
+      <div className="app-main">
+        <header className="app-topbar">
+          <div className="app-topbar-heading">
+            <div className="app-topbar-title">Career roles</div>
+            <div className="app-topbar-subtitle">{roles.length} roles</div>
           </div>
-        </form>
-      </section>
+        </header>
 
-      <section className="upload-section">
-        <h2>Existing Roles ({roles.length})</h2>
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Role Name</th>
-                <th>Technical Skills</th>
-                <th>Soft Skills</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {roles.map((role) => (
-                <tr key={role._id}>
-                  <td>{role.role_name}</td>
-                  <td>{(role.technical_skills || []).length}</td>
-                  <td>{(role.soft_skills || []).length}</td>
-                  <td>
-                    <button onClick={() => startEdit(role)}>Edit</button>
-                    <button onClick={() => handleDelete(role._id)}>Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+        <div className="app-content">
+          {error && <p className="error-text">{error}</p>}
+
+          <div className="admin-layout">
+            <section className="data-table">
+              <div className="data-table-head admin-table-row">
+                <div>ROLE</div>
+                <div>TECHNICAL</div>
+                <div>SOFT</div>
+                <div>RESOURCES</div>
+                <div style={{ textAlign: "right" }}>ACTIONS</div>
+              </div>
+              {loading ? (
+                <div style={{ padding: 20 }}>Loading...</div>
+              ) : (
+                roles.map((role) => (
+                  <div className="data-table-row admin-table-row" key={role._id}>
+                    <div style={{ fontWeight: 600 }}>{role.role_name}</div>
+                    <div className="data-table-figure">{(role.technical_skills || []).length}</div>
+                    <div className="data-table-figure">{(role.soft_skills || []).length}</div>
+                    <div className="data-table-figure">{(role.learning_resources || []).length}</div>
+                    <div className="admin-table-actions">
+                      <button onClick={() => startEdit(role)}>Edit</button>
+                      <button onClick={() => handleDelete(role._id)}>Delete</button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </section>
+
+            <div className="admin-edit-panel">
+              <div className="admin-edit-head">
+                <div>
+                  <div className="mono-label">{editingId ? "EDITING ROLE" : "NEW ROLE"}</div>
+                  <div className="admin-edit-title">{editingId ? form.role_name : "Add a role"}</div>
+                </div>
+              </div>
+              <form onSubmit={handleSubmit} className="admin-form">
+                <label>
+                  Role name
+                  <input
+                    value={form.role_name}
+                    onChange={(e) => setForm({ ...form, role_name: e.target.value })}
+                    required
+                  />
+                </label>
+
+                <label>
+                  Description
+                  <input
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  />
+                </label>
+
+                <label>
+                  Technical skills (one "Skill: priority" per line - priority is high/medium/low)
+                  <textarea
+                    value={form.technical_skills}
+                    onChange={(e) => setForm({ ...form, technical_skills: e.target.value })}
+                    rows={5}
+                    placeholder={"Docker: high\nKubernetes: high\nLinux: medium"}
+                  />
+                </label>
+
+                <label>
+                  Soft skills (one "Skill: priority" per line)
+                  <textarea
+                    value={form.soft_skills}
+                    onChange={(e) => setForm({ ...form, soft_skills: e.target.value })}
+                    rows={3}
+                    placeholder={"Problem Solving: high\nCommunication: medium"}
+                  />
+                </label>
+
+                <label>
+                  Learning resources (one "Title|URL" per line)
+                  <textarea
+                    value={form.learning_resources}
+                    onChange={(e) => setForm({ ...form, learning_resources: e.target.value })}
+                    rows={2}
+                    placeholder="Docker Docs|https://docs.docker.com/"
+                  />
+                </label>
+
+                <label>
+                  Portfolio projects (one per line)
+                  <textarea
+                    value={form.portfolio_projects}
+                    onChange={(e) => setForm({ ...form, portfolio_projects: e.target.value })}
+                    rows={2}
+                    placeholder="Set up a CI/CD pipeline for a sample app"
+                  />
+                </label>
+
+                <div className="admin-form-actions">
+                  <button type="submit" className="btn btn-primary">
+                    {editingId ? "Save changes" : "Add role"}
+                  </button>
+                  {editingId && (
+                    <button type="button" className="btn" onClick={cancelEdit}>
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

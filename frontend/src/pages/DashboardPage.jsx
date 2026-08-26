@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import AnalysisResults from "../components/AnalysisResults";
+import Sidebar from "../components/Sidebar";
 
 export default function DashboardPage() {
   const { user, token, logout } = useAuth();
@@ -122,64 +123,58 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>SkillMatch AI Dashboard</h1>
-        <div>
-          <span className="welcome-text">Welcome, {user?.name}</span>
-          <Link to="/admin" className="admin-link">
-            Admin
-          </Link>
-          <button
-            className="logout-button"
-            onClick={() => {
-              logout();
-              navigate("/login");
-            }}
-          >
-            Log out
-          </button>
+    <div className="app-shell">
+      <Sidebar active="Dashboard" />
+
+      <div className="app-main">
+        <header className="app-topbar">
+          <div className="app-topbar-heading">
+            <div className="app-topbar-title">Dashboard</div>
+            <div className="app-topbar-subtitle">Paste your CV or upload a file to get started</div>
+          </div>
+        </header>
+
+        <div className="app-content">
+          <section className="card upload-section">
+            <div className="card-title">Paste your CV</div>
+            <textarea
+              value={cvText}
+              onChange={(e) => setCvText(e.target.value)}
+              placeholder="Paste your CV text here..."
+              rows={10}
+            />
+            <div>
+              <button className="btn btn-primary" onClick={handleAnalyze} disabled={loading}>
+                {loading ? "Analyzing..." : "Analyze"}
+              </button>
+            </div>
+            {error && <p className="error-text">{error}</p>}
+
+            <div className="upload-divider card-title">Or upload a CV file (PDF/DOCX)</div>
+            <input
+              type="file"
+              accept=".pdf,.docx"
+              onChange={(e) => setSelectedFile(e.target.files[0] || null)}
+            />
+            <div>
+              <button className="btn btn-primary" onClick={handleAnalyzeFile} disabled={fileLoading}>
+                {fileLoading ? "Analyzing..." : "Analyze File"}
+              </button>
+            </div>
+            {fileError && <p className="error-text">{fileError}</p>}
+          </section>
+
+          {result && (
+            <AnalysisResults
+              result={result}
+              completedSkills={completedSkills}
+              onToggleSkill={handleToggleSkill}
+              onAddCorrection={handleAddCorrection}
+              onGenerateReport={handleGenerateReport}
+            />
+          )}
         </div>
-      </header>
-
-      <section className="upload-section">
-        <h2>Paste Your CV</h2>
-        <textarea
-          value={cvText}
-          onChange={(e) => setCvText(e.target.value)}
-          placeholder="Paste your CV text here..."
-          rows={12}
-        />
-        <button onClick={handleAnalyze} disabled={loading}>
-          {loading ? "Analyzing..." : "Analyze"}
-        </button>
-        {error && <p className="error-text">{error}</p>}
-
-        <h2 className="file-upload-heading">Or upload a CV file (PDF/DOCX)</h2>
-        <input
-          type="file"
-          accept=".pdf,.docx"
-          onChange={(e) => setSelectedFile(e.target.files[0] || null)}
-        />
-        <button onClick={handleAnalyzeFile} disabled={fileLoading}>
-          {fileLoading ? "Analyzing..." : "Analyze File"}
-        </button>
-        {fileError && <p className="error-text">{fileError}</p>}
-      </section>
-
-      {result && (
-        <>
-          <AnalysisResults
-            result={result}
-            completedSkills={completedSkills}
-            onToggleSkill={handleToggleSkill}
-            onAddCorrection={handleAddCorrection}
-          />
-          <button className="report-button" onClick={handleGenerateReport}>
-            Generate Report
-          </button>
-        </>
-      )}
+      </div>
     </div>
   );
 }
