@@ -1,0 +1,207 @@
+{
+  "new_roles": [
+    {
+      "role_id": "software_engineer",
+      "role_name": "Software Engineer",
+      "description": "Designs, develops, and maintains software applications across the full development lifecycle.",
+      "technical_skills": [
+        { "skill": "Data Structures", "priority": "high" },
+        { "skill": "Algorithms", "priority": "high" },
+        { "skill": "Object-Oriented Programming", "priority": "high" },
+        { "skill": "Git", "priority": "high" },
+        { "skill": "SQL", "priority": "medium" },
+        { "skill": "REST APIs", "priority": "medium" },
+        { "skill": "Unit Testing", "priority": "medium" },
+        { "skill": "Design Patterns", "priority": "low" },
+        { "skill": "Docker", "priority": "low" },
+        { "skill": "Agile", "priority": "low" }
+      ],
+      "soft_skills": [
+        { "skill": "Problem Solving", "priority": "high" },
+        { "skill": "Logical Thinking", "priority": "high" },
+        { "skill": "Communication", "priority": "medium" },
+        { "skill": "Teamwork", "priority": "medium" }
+      ],
+      "learning_resources": [
+        { "title": "freeCodeCamp - Data Structures and Algorithms", "url": "https://www.freecodecamp.org/" },
+        { "title": "Refactoring Guru - Design Patterns", "url": "https://refactoring.guru/design-patterns" }
+      ],
+      "portfolio_projects": [
+        "Implement common data structures and algorithms from scratch",
+        "Build a small full-stack CRUD application applying OOP principles"
+      ]
+    },
+    {
+      "role_id": "fullstack_developer",
+      "role_name": "Full Stack Developer",
+      "description": "Builds and maintains both the frontend and backend layers of web applications.",
+      "technical_skills": [
+        { "skill": "HTML", "priority": "high" },
+        { "skill": "CSS", "priority": "high" },
+        { "skill": "JavaScript", "priority": "high" },
+        { "skill": "React", "priority": "high" },
+        { "skill": "Node.js", "priority": "high" },
+        { "skill": "Express.js", "priority": "medium" },
+        { "skill": "SQL", "priority": "medium" },
+        { "skill": "MongoDB", "priority": "medium" },
+        { "skill": "REST APIs", "priority": "medium" },
+        { "skill": "Git", "priority": "medium" },
+        { "skill": "Authentication", "priority": "low" }
+      ],
+      "soft_skills": [
+        { "skill": "Problem Solving", "priority": "high" },
+        { "skill": "Communication", "priority": "medium" },
+        { "skill": "Time Management", "priority": "medium" }
+      ],
+      "learning_resources": [
+        { "title": "The Odin Project - Full Stack JavaScript", "url": "https://www.theodinproject.com/" },
+        { "title": "MDN Web Docs", "url": "https://developer.mozilla.org/" }
+      ],
+      "portfolio_projects": [
+        "Build a full stack application with a React frontend and Node/Express backend",
+        "Create a full stack blog platform with authentication and a database"
+      ]
+    },
+    {
+      "role_id": "ml_intern",
+      "role_name": "Machine Learning Intern",
+      "description": "Supports the development and evaluation of machine learning models under supervision.",
+      "technical_skills": [
+        { "skill": "Python", "priority": "high" },
+        { "skill": "Scikit-learn", "priority": "high" },
+        { "skill": "Pandas", "priority": "high" },
+        { "skill": "NumPy", "priority": "medium" },
+        { "skill": "Statistics", "priority": "medium" },
+        { "skill": "Data Visualization", "priority": "medium" },
+        { "skill": "SQL", "priority": "low" },
+        { "skill": "Jupyter Notebooks", "priority": "low" },
+        { "skill": "TensorFlow", "priority": "low" }
+      ],
+      "soft_skills": [
+        { "skill": "Analytical Thinking", "priority": "high" },
+        { "skill": "Curiosity", "priority": "medium" },
+        { "skill": "Communication", "priority": "medium" }
+      ],
+      "learning_resources": [
+        { "title": "Scikit-learn Official Documentation", "url": "https://scikit-learn.org/stable/" },
+        { "title": "Kaggle Learn - Machine Learning", "url": "https://www.kaggle.com/learn/intro-to-machine-learning" }
+      ],
+      "portfolio_projects": [
+        "Train and evaluate a classification model on a public dataset",
+        "Build a data preprocessing and visualization pipeline for a sample dataset"
+      ]
+    },
+    {
+      "role_id": "uiux_designer",
+      "role_name": "UI/UX Designer",
+      "description": "Designs user interfaces and experiences that are usable, accessible, and visually effective.",
+      "technical_skills": [
+        { "skill": "Figma", "priority": "high" },
+        { "skill": "Wireframing", "priority": "high" },
+        { "skill": "Prototyping", "priority": "high" },
+        { "skill": "Responsive Design", "priority": "medium" },
+        { "skill": "Accessibility", "priority": "medium" },
+        { "skill": "User Research", "priority": "medium" },
+        { "skill": "HTML", "priority": "low" },
+        { "skill": "CSS", "priority": "low" }
+      ],
+      "soft_skills": [
+        { "skill": "Creativity", "priority": "high" },
+        { "skill": "Empathy", "priority": "medium" },
+        { "skill": "Communication", "priority": "medium" },
+        { "skill": "Attention to Detail", "priority": "medium" }
+      ],
+      "learning_resources": [
+        { "title": "Figma Official Tutorials", "url": "https://www.figma.com/resources/learn-design/" },
+        { "title": "Nielsen Norman Group - UX Fundamentals", "url": "https://www.nngroup.com/articles/" }
+      ],
+      "portfolio_projects": [
+        "Design a complete mobile app UI/UX case study in Figma",
+        "Redesign an existing website's user interface with improved accessibility"
+      ]
+    },
+    {
+      "role_id": "business_analyst",
+      "role_name": "Business Analyst",
+      "description": "Analyzes business requirements and processes to recommend and support technology-driven solutions.",
+      "technical_skills": [
+        { "skill": "Excel", "priority": "high" },
+        { "skill": "Requirement Gathering", "priority": "high" },
+        { "skill": "SQL", "priority": "medium" },
+        { "skill": "Data Visualization", "priority": "medium" },
+        { "skill": "Process Mapping", "priority": "medium" },
+        { "skill": "Documentation", "priority": "low" },
+        { "skill": "Power BI", "priority": "low" }
+      ],
+      "soft_skills": [
+        { "skill": "Communication", "priority": "high" },
+        { "skill": "Analytical Thinking", "priority": "high" },
+        { "skill": "Stakeholder Management", "priority": "medium" },
+        { "skill": "Problem Solving", "priority": "medium" }
+      ],
+      "learning_resources": [
+        { "title": "Business Analyst Career Guide - Coursera", "url": "https://www.coursera.org/articles/business-analyst" },
+        { "title": "Microsoft Excel Official Training", "url": "https://support.microsoft.com/en-us/excel" }
+      ],
+      "portfolio_projects": [
+        "Document a requirements specification for a sample business system",
+        "Create a process flow diagram and improvement proposal for a sample workflow"
+      ]
+    },
+    {
+      "role_id": "devops_intern",
+      "role_name": "DevOps Intern",
+      "description": "Supports the automation, deployment, and monitoring of software delivery pipelines.",
+      "technical_skills": [
+        { "skill": "Linux", "priority": "high" },
+        { "skill": "Git", "priority": "high" },
+        { "skill": "Docker", "priority": "high" },
+        { "skill": "CI/CD", "priority": "medium" },
+        { "skill": "Bash Scripting", "priority": "medium" },
+        { "skill": "Networking", "priority": "medium" },
+        { "skill": "AWS", "priority": "low" },
+        { "skill": "Kubernetes", "priority": "low" }
+      ],
+      "soft_skills": [
+        { "skill": "Problem Solving", "priority": "high" },
+        { "skill": "Attention to Detail", "priority": "medium" },
+        { "skill": "Adaptability", "priority": "medium" }
+      ],
+      "learning_resources": [
+        { "title": "Docker Official Documentation", "url": "https://docs.docker.com/get-started/" },
+        { "title": "AWS Free Tier Documentation", "url": "https://aws.amazon.com/free" }
+      ],
+      "portfolio_projects": [
+        "Containerize an existing application using Docker",
+        "Set up a basic CI/CD pipeline for automated testing and deployment"
+      ]
+    },
+    {
+      "role_id": "cybersecurity_analyst",
+      "role_name": "Cybersecurity Analyst",
+      "description": "Monitors, detects, and responds to security threats while supporting an organization's security posture.",
+      "technical_skills": [
+        { "skill": "Networking", "priority": "high" },
+        { "skill": "Linux", "priority": "high" },
+        { "skill": "Security Fundamentals", "priority": "high" },
+        { "skill": "Vulnerability Assessment", "priority": "medium" },
+        { "skill": "SIEM Tools", "priority": "medium" },
+        { "skill": "Cryptography Basics", "priority": "low" },
+        { "skill": "Python", "priority": "low" }
+      ],
+      "soft_skills": [
+        { "skill": "Attention to Detail", "priority": "high" },
+        { "skill": "Analytical Thinking", "priority": "high" },
+        { "skill": "Communication", "priority": "medium" }
+      ],
+      "learning_resources": [
+        { "title": "TryHackMe - Introduction to Cyber Security", "url": "https://tryhackme.com/" },
+        { "title": "OWASP Top Ten", "url": "https://owasp.org/www-project-top-ten/" }
+      ],
+      "portfolio_projects": [
+        "Complete a beginner-friendly capture-the-flag (CTF) style security exercise",
+        "Write a basic vulnerability assessment report for a sample system"
+      ]
+    }
+  ]
+}
