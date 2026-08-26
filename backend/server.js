@@ -11,6 +11,7 @@ const adminRolesRoutes = require("./src/routes/adminRoles");
 const adminCorrectionsRoutes = require("./src/routes/adminCorrections");
 const userRoutes = require("./src/routes/user");
 const requireAuth = require("./src/middleware/auth");
+const requireAdmin = require("./src/middleware/admin");
 
 const app = express();
 
@@ -32,10 +33,11 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/cv", cvRoutes);
 app.use("/api/roles", rolesRoutes);
-// Protected by requireAuth only (any logged-in user), not a real admin
-// role check - see the limitation note in src/routes/adminRoles.js.
-app.use("/api/admin/roles", requireAuth, adminRolesRoutes);
-app.use("/api/admin/corrections", requireAuth, adminCorrectionsRoutes);
+// requireAdmin runs after requireAuth and checks the user's role is
+// actually "admin" (fresh from the DB, not just "any valid JWT") - see
+// src/middleware/admin.js.
+app.use("/api/admin/roles", requireAuth, requireAdmin, adminRolesRoutes);
+app.use("/api/admin/corrections", requireAuth, requireAdmin, adminCorrectionsRoutes);
 app.use("/api/user", requireAuth, userRoutes);
 
 // 404 handler for unknown routes

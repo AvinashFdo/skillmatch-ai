@@ -3,8 +3,8 @@ const CorrectionLog = require("../models/CorrectionLog");
 
 const router = express.Router();
 
-// Same minimal protection as adminRoles.js - requireAuth only, no real
-// admin-role check yet. See the limitation note there.
+// Protected by requireAuth + requireAdmin, both mounted in server.js -
+// same as adminRoles.js.
 
 /**
  * GET /api/admin/corrections

@@ -51,7 +51,7 @@ export default function ReportPage() {
         <div className="app-main">
           <div className="app-content">
             <p>No analysis data to report on. Analyze a CV first.</p>
-            <Link to="/dashboard">Back to Dashboard</Link>
+            <Link to="/cv-profile">Go to CV &amp; Profile</Link>
           </div>
         </div>
       </div>

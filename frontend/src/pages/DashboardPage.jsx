@@ -1,141 +1,31 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import apiClient from "../api/client";
-import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import useAnalysis from "../hooks/useAnalysis";
 import { computeAnalysisStats } from "../utils/analysisStats";
 
+const ROLE_PREVIEW_COUNT = 5;
+
 /**
- * Overview/landing page - part 1 of 4 (Dashboard/Skills/Roles/Roadmap),
- * split out from what used to be a single all-in-one Dashboard page, to
- * match design_reference.html's page breakdown. This page now only
- * owns: the top-level stat summary, the CV paste/file-upload inputs, and
- * navigation into the other 3 pages - the detailed skills list, role-fit
- * table, and roadmap/progress UI all moved to their own routes.
+ * Overview/landing page - matches design_reference.html's actual
+ * Dashboard (FIG 02) more precisely than the earlier version of this
+ * page did. Re-reading the reference closely showed its Dashboard has
+ * NO CV upload and NO profile form at all - just the 4 stat cards and a
+ * role-fit preview; those two other things live on their own "CV &
+ * Profile" page. Moved both of them out to CvProfilePage.jsx
+ * accordingly - this page is now purely a summary + navigation hub:
+ * the 4 stat cards, a top-5 role-fit preview (linking to the full
+ * table on /roles), and links into the other pages.
  *
- * On a successful analyze, this page auto-navigates to /skills rather
- * than showing a "view results" call-to-action - chosen over the
- * alternative because it's one less click and there's no ambiguity
- * about what "next" means (skills is always the first thing worth
- * checking after an analysis). See CLAUDE_LOG.md for the tradeoff note.
+ * The reference's Dashboard also has "next actions"/"activity" widgets
+ * that aren't reproduced here - explicitly out of scope per the task
+ * that introduced this restructure, since they'd need new data this
+ * app doesn't track (e.g. an actual activity log).
  */
 export default function DashboardPage() {
-  const { token, logout } = useAuth();
-  const navigate = useNavigate();
-  const { result, setResult, completedSkills, profile, updateProfile, loading } = useAnalysis();
-
-  const [cvText, setCvText] = useState("");
-  const [error, setError] = useState("");
-  const [analyzing, setAnalyzing] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [fileError, setFileError] = useState("");
-  const [fileAnalyzing, setFileAnalyzing] = useState(false);
-
-  const [editingProfile, setEditingProfile] = useState(false);
-  const [profileForm, setProfileForm] = useState({ programme: "", year: "", studyHoursPerWeek: "" });
-  const [profileError, setProfileError] = useState("");
-  const [savingProfile, setSavingProfile] = useState(false);
-
-  const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
+  const { result, completedSkills, loading } = useAnalysis();
   const stats = computeAnalysisStats(result, completedSkills);
-
-  function startEditProfile() {
-    setProfileForm({
-      programme: profile.programme || "",
-      year: profile.year || "",
-      studyHoursPerWeek: profile.studyHoursPerWeek ?? "",
-    });
-    setProfileError("");
-    setEditingProfile(true);
-  }
-
-  async function handleSaveProfile(e) {
-    e.preventDefault();
-    setProfileError("");
-
-    const hours = profileForm.studyHoursPerWeek === "" ? null : Number(profileForm.studyHoursPerWeek);
-    if (hours !== null && (!Number.isFinite(hours) || hours <= 0)) {
-      setProfileError("Study time must be a positive number of hours.");
-      return;
-    }
-
-    setSavingProfile(true);
-    try {
-      await updateProfile({
-        programme: profileForm.programme.trim(),
-        year: profileForm.year.trim(),
-        studyHoursPerWeek: hours,
-      });
-      setEditingProfile(false);
-    } catch (err) {
-      if (err.response?.status === 401) {
-        logout();
-        navigate("/login");
-        return;
-      }
-      setProfileError(err.response?.data?.error || "Could not save profile. Please try again.");
-    } finally {
-      setSavingProfile(false);
-    }
-  }
-
-  async function handleAnalyze() {
-    setError("");
-
-    if (!cvText.trim()) {
-      setError("Paste some CV text before analyzing.");
-      return;
-    }
-
-    setAnalyzing(true);
-    try {
-      const res = await apiClient.post("/cv/analyze", { cv_text: cvText }, authHeaders);
-      setResult(res.data);
-      navigate("/skills");
-    } catch (err) {
-      if (err.response?.status === 401) {
-        logout();
-        navigate("/login");
-        return;
-      }
-      setError(err.response?.data?.error || "Analysis failed. Please try again.");
-    } finally {
-      setAnalyzing(false);
-    }
-  }
-
-  async function handleAnalyzeFile() {
-    setFileError("");
-
-    if (!selectedFile) {
-      setFileError("Choose a PDF or DOCX file before analyzing.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    setFileAnalyzing(true);
-    try {
-      const res = await apiClient.post("/cv/analyze-file", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setResult(res.data);
-      navigate("/skills");
-    } catch (err) {
-      if (err.response?.status === 401) {
-        logout();
-        navigate("/login");
-        return;
-      }
-      setFileError(err.response?.data?.error || "File analysis failed. Please try again.");
-    } finally {
-      setFileAnalyzing(false);
-    }
-  }
-
   const hasResult = Boolean(result);
+  const roleFitPreview = (result?.role_fit || []).slice(0, ROLE_PREVIEW_COUNT);
 
   return (
     <div className="app-shell">
@@ -145,81 +35,11 @@ export default function DashboardPage() {
         <header className="app-topbar">
           <div className="app-topbar-heading">
             <div className="app-topbar-title">Dashboard</div>
-            <div className="app-topbar-subtitle">Paste your CV or upload a file to get started</div>
+            <div className="app-topbar-subtitle">Your career readiness at a glance</div>
           </div>
         </header>
 
         <div className="app-content">
-          {!loading && (
-            <section className="card">
-              <div className="card-title">Profile details</div>
-              {!editingProfile ? (
-                <>
-                  <div className="profile-detail-list">
-                    <div className="profile-detail-row">
-                      <span className="profile-detail-label">Programme</span>
-                      <span className="profile-detail-value">{profile.programme || "Not set"}</span>
-                    </div>
-                    <div className="profile-detail-row">
-                      <span className="profile-detail-label">Year</span>
-                      <span className="profile-detail-value">{profile.year || "Not set"}</span>
-                    </div>
-                    <div className="profile-detail-row">
-                      <span className="profile-detail-label">Study time/week</span>
-                      <span className="profile-detail-value">
-                        {profile.studyHoursPerWeek ? `${profile.studyHoursPerWeek} hours` : "Not set"}
-                      </span>
-                    </div>
-                  </div>
-                  <div style={{ marginTop: 14 }}>
-                    <button className="btn" onClick={startEditProfile}>
-                      Edit profile
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <form className="profile-edit-form" onSubmit={handleSaveProfile}>
-                  <label>
-                    Programme
-                    <input
-                      value={profileForm.programme}
-                      onChange={(e) => setProfileForm({ ...profileForm, programme: e.target.value })}
-                      placeholder="e.g. BSc Computer Science"
-                    />
-                  </label>
-                  <label>
-                    Year
-                    <input
-                      value={profileForm.year}
-                      onChange={(e) => setProfileForm({ ...profileForm, year: e.target.value })}
-                      placeholder="e.g. Year 3"
-                    />
-                  </label>
-                  <label>
-                    Study time/week (hours)
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={profileForm.studyHoursPerWeek}
-                      onChange={(e) => setProfileForm({ ...profileForm, studyHoursPerWeek: e.target.value })}
-                      placeholder="e.g. 8"
-                    />
-                  </label>
-                  {profileError && <p className="error-text">{profileError}</p>}
-                  <div className="profile-edit-actions">
-                    <button type="submit" className="btn btn-primary" disabled={savingProfile}>
-                      {savingProfile ? "Saving..." : "Save"}
-                    </button>
-                    <button type="button" className="btn" onClick={() => setEditingProfile(false)}>
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              )}
-            </section>
-          )}
-
           {!loading && hasResult && (
             <div className="stat-grid">
               <div className="stat-card">
@@ -285,7 +105,50 @@ export default function DashboardPage() {
           {!loading && !hasResult && (
             <section className="card">
               <div className="card-title">No analysis yet</div>
-              <p>Paste your CV text or upload a file below to get your first readiness score.</p>
+              <p>
+                Head to <Link to="/cv-profile">CV &amp; Profile</Link> to paste your CV text or upload a
+                file and get your first readiness score.
+              </p>
+            </section>
+          )}
+
+          {!loading && hasResult && (
+            <section className="data-table">
+              <div className="data-table-head role-fit-table-row">
+                <div>CAREER ROLE</div>
+                <div>MATCHED</div>
+                <div>ROLE-FIT SCORE</div>
+                <div style={{ textAlign: "right" }}>GAPS</div>
+              </div>
+              {roleFitPreview.map((role, index) => (
+                <div
+                  className={`data-table-row role-fit-table-row ${index === 0 ? "data-table-row-lead" : ""}`}
+                  key={role.role_id}
+                >
+                  <div>
+                    {role.role_name}
+                    {index === 0 && <span className="role-fit-target-badge">TARGET</span>}
+                  </div>
+                  <div className="data-table-figure">
+                    {role.skills_matched_count} / {role.skills_required_count}
+                  </div>
+                  <div className="role-fit-score-bar">
+                    <div className="role-fit-score-track">
+                      <div className="role-fit-score-fill" style={{ width: `${role.fit_score_percent}%` }} />
+                    </div>
+                    <span className="role-fit-score-value">{role.fit_score_percent}%</span>
+                  </div>
+                  <div className="data-table-figure" style={{ textAlign: "right" }}>
+                    {role.skills_required_count - role.skills_matched_count}
+                  </div>
+                </div>
+              ))}
+              <div className="data-table-foot">
+                <span>
+                  SHOWING {roleFitPreview.length} OF {result.role_fit.length} ROLES
+                </span>
+                <Link to="/roles">See all role matches</Link>
+              </div>
             </section>
           )}
 
@@ -293,6 +156,9 @@ export default function DashboardPage() {
             <section className="card">
               <div className="card-title">Explore your results</div>
               <div className="dashboard-nav-links">
+                <Link to="/cv-profile" className="btn">
+                  CV &amp; Profile
+                </Link>
                 <Link
                   to="/skills"
                   className="btn"
@@ -323,35 +189,6 @@ export default function DashboardPage() {
               </div>
             </section>
           )}
-
-          <section className="card upload-section">
-            <div className="card-title">Paste your CV</div>
-            <textarea
-              value={cvText}
-              onChange={(e) => setCvText(e.target.value)}
-              placeholder="Paste your CV text here..."
-              rows={10}
-            />
-            <div>
-              <button className="btn btn-primary" onClick={handleAnalyze} disabled={analyzing}>
-                {analyzing ? "Analyzing..." : "Analyze"}
-              </button>
-            </div>
-            {error && <p className="error-text">{error}</p>}
-
-            <div className="upload-divider card-title">Or upload a CV file (PDF/DOCX)</div>
-            <input
-              type="file"
-              accept=".pdf,.docx"
-              onChange={(e) => setSelectedFile(e.target.files[0] || null)}
-            />
-            <div>
-              <button className="btn btn-primary" onClick={handleAnalyzeFile} disabled={fileAnalyzing}>
-                {fileAnalyzing ? "Analyzing..." : "Analyze File"}
-              </button>
-            </div>
-            {fileError && <p className="error-text">{fileError}</p>}
-          </section>
         </div>
       </div>
     </div>

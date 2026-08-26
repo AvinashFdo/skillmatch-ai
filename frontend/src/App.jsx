@@ -1,10 +1,12 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
+import CvProfilePage from "./pages/CvProfilePage";
 import SkillsPage from "./pages/SkillsPage";
 import RolesPage from "./pages/RolesPage";
 import RoadmapPage from "./pages/RoadmapPage";
@@ -41,6 +43,14 @@ export default function App() {
             }
           />
           <Route
+            path="/cv-profile"
+            element={
+              <ProtectedRoute>
+                <CvProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/skills"
             element={
               <ProtectedRoute>
@@ -67,9 +77,9 @@ export default function App() {
           <Route
             path="/admin"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminPage />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route

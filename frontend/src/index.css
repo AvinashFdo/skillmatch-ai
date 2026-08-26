@@ -739,6 +739,10 @@ a:hover {
   letter-spacing: 0.05em;
 }
 
+.data-table-foot a {
+  color: var(--color-accent);
+}
+
 .role-fit-table-row {
   grid-template-columns: 2fr 100px 2fr 70px;
   gap: 14px;

@@ -33,8 +33,8 @@ export default function RolesPage() {
             <section className="card">
               <div className="card-title">No analysis yet</div>
               <p>
-                Analyze a CV on the <Link to="/dashboard">Dashboard</Link> first to see your role
-                matches.
+                Analyze a CV on the <Link to="/cv-profile">CV &amp; Profile</Link> page first to see your
+                role matches.
               </p>
             </section>
           )}

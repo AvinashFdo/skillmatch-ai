@@ -69,8 +69,8 @@ export default function SkillsPage() {
             <section className="card">
               <div className="card-title">No analysis yet</div>
               <p>
-                Analyze a CV on the <Link to="/dashboard">Dashboard</Link> first to see your extracted
-                skills.
+                Analyze a CV on the <Link to="/cv-profile">CV &amp; Profile</Link> page first to see your
+                extracted skills.
               </p>
             </section>
           )}

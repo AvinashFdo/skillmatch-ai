@@ -42,7 +42,8 @@ export default function RoadmapPage() {
             <section className="card">
               <div className="card-title">No analysis yet</div>
               <p>
-                Analyze a CV on the <Link to="/dashboard">Dashboard</Link> first to see your roadmap.
+                Analyze a CV on the <Link to="/cv-profile">CV &amp; Profile</Link> page first to see your
+                roadmap.
               </p>
             </section>
           )}
@@ -72,8 +73,8 @@ export default function RoadmapPage() {
                     )
                   ) : (
                     <>
-                      Set your study time on the <Link to="/dashboard">Dashboard</Link> to see an estimated
-                      completion time for this roadmap.
+                      Set your study time on the <Link to="/cv-profile">CV &amp; Profile</Link> page to see
+                      an estimated completion time for this roadmap.
                     </>
                   )}
                 </p>

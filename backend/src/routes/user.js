@@ -7,7 +7,10 @@ const router = express.Router();
  * GET /api/user/me
  * Returns the logged-in user's profile, including their completed
  * skills list - used by the dashboard to restore checkbox state and
- * compute readiness on load.
+ * compute readiness on load. Also returns `role`, which the frontend
+ * uses to decide whether to show the Admin sidebar link/route - purely
+ * a UI convenience, not a security boundary (the real one is
+ * requireAdmin on the backend admin routes).
  */
 router.get("/me", async (req, res, next) => {
   try {
@@ -20,6 +23,7 @@ router.get("/me", async (req, res, next) => {
       id: user._id,
       name: user.name,
       email: user.email,
+      role: user.role,
       completedSkills: user.completedSkills,
       programme: user.programme,
       year: user.year,

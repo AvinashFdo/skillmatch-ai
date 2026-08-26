@@ -21,6 +21,19 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true, // bcrypt hash, not plaintext
   },
+  // Real role-based access control - admin routes (adminRoles.js,
+  // adminCorrections.js) require this to be "admin", checked fresh from
+  // the database on every request (see middleware/admin.js), not just
+  // "any logged-in user with a valid JWT" as before. There is no
+  // self-service way to become admin (no signup field, no API route) -
+  // promotion is a manual one-time DB write, by design, since this is a
+  // small fixed-roster student project rather than a multi-tenant app
+  // that needs an admin-invites-admin flow.
+  role: {
+    type: String,
+    enum: ["student", "admin"],
+    default: "student",
+  },
   // Skill names the user has marked as done, toward whichever role's
   // roadmap they were viewing at the time. Deliberately just a flat
   // list of strings, not tied to a specific role or a separate

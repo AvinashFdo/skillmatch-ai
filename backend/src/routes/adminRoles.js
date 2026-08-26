@@ -3,12 +3,8 @@ const Role = require("../models/Role");
 
 const router = express.Router();
 
-// LIMITATION: there is no role-based permission system yet - any
-// logged-in user can reach these routes (the requireAuth middleware
-// that protects this whole router, mounted in server.js, only checks
-// for a valid JWT, not an "admin" flag on the user). Fine for this
-// project's scope, but a real admin panel would need a proper
-// role/permission check here before these routes go further.
+// Protected by requireAuth + requireAdmin, both mounted in server.js -
+// only users with role "admin" can reach any route in this router.
 
 /**
  * GET /api/admin/roles
