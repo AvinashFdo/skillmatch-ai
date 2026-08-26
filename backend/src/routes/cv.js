@@ -5,6 +5,7 @@ const multer = require("multer");
 const FormData = require("form-data");
 const requireAuth = require("../middleware/auth");
 const CorrectionLog = require("../models/CorrectionLog");
+const User = require("../models/User");
 
 const router = express.Router();
 
@@ -44,6 +45,7 @@ router.post("/analyze", requireAuth, async (req, res, next) => {
     const aiResponse = await axios.post(`${process.env.AI_SERVICE_URL}/analyze`, {
       cv_text,
     });
+    await User.findByIdAndUpdate(req.user.userId, { lastAnalysis: aiResponse.data });
     res.json(aiResponse.data);
   } catch (err) {
     if (err.code === "ECONNREFUSED") {
@@ -91,6 +93,7 @@ router.post("/analyze-file", requireAuth, (req, res, next) => {
         formData,
         { headers: formData.getHeaders() }
       );
+      await User.findByIdAndUpdate(req.user.userId, { lastAnalysis: aiResponse.data });
       res.json(aiResponse.data);
     } catch (aiErr) {
       if (aiErr.code === "ECONNREFUSED") {

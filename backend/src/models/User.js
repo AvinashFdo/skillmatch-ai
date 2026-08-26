@@ -31,6 +31,38 @@ const userSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  // The full response from the AI service's /analyze or /analyze-file
+  // (extracted_skills, role_fit, recommended_role/roadmap), saved on
+  // every successful analysis so results survive navigating between the
+  // separate Dashboard/Skills/Roles/Roadmap pages and a page refresh -
+  // each of those pages fetches this via GET /api/user/analysis on
+  // mount instead of relying on in-memory state passed between routes.
+  // Mixed rather than a formal sub-schema since its shape is owned by
+  // the AI service, not this app - keeping it untyped here avoids the
+  // two services' schemas drifting out of sync.
+  lastAnalysis: {
+    type: mongoose.Schema.Types.Mixed,
+    default: null,
+  },
+  // Optional student profile fields, set via PATCH /api/user/profile.
+  // studyHoursPerWeek is the only one used functionally - it drives the
+  // roadmap completion-time estimate on /roadmap. programme/year are
+  // purely informational (shown on the Dashboard profile panel) - not
+  // used in any scoring/analysis logic, deliberately, per scope.
+  programme: {
+    type: String,
+    default: "",
+    trim: true,
+  },
+  year: {
+    type: String,
+    default: "",
+    trim: true,
+  },
+  studyHoursPerWeek: {
+    type: Number,
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

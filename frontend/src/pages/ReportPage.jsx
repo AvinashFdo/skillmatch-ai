@@ -1,5 +1,8 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import { useAuth } from "../context/AuthContext";
+import useAnalysis from "../hooks/useAnalysis";
+import { computeAnalysisStats } from "../utils/analysisStats";
 
 /**
  * Read-only summary of the most recent analysis, formatted for
@@ -15,24 +18,36 @@ import Sidebar from "../components/Sidebar";
  *   3. Priority gaps  -> the existing priority-grouped missing skills
  *   4. Recommended plan -> the existing resources + projects lists
  *   5. Notes and limitations -> static disclaimer copy (not data-driven)
- * No "readiness band" label or other derived concept from the
- * reference was added - only real, already-computed numbers are shown.
  *
- * Data is passed via react-router navigation state (set by
- * DashboardPage's "Generate Report" button) rather than a dedicated
- * backend endpoint, since everything shown here already exists in the
- * analyze response the dashboard already has in memory. This means a
- * direct visit/refresh of /report with no prior analysis has nothing
- * to show - handled below rather than crashing.
+ * Previously received its data via react-router navigation state, set
+ * by the (now-retired) single Dashboard page's "Generate Report"
+ * button. Now that results live in the 4-page split, this instead
+ * fetches the user's persisted lastAnalysis the same way every other
+ * page does (useAnalysis) - which also means a direct visit or refresh
+ * of /report correctly restores the report instead of going blank.
  */
 export default function ReportPage() {
-  const location = useLocation();
-  const { result, completedSkills = [], userName } = location.state || {};
+  const { user } = useAuth();
+  const { result, completedSkills, loading } = useAnalysis();
+  const stats = computeAnalysisStats(result, completedSkills);
+
+  if (loading) {
+    return (
+      <div className="app-shell">
+        <Sidebar active="Roadmap" />
+        <div className="app-main">
+          <div className="app-content">
+            <p>Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!result) {
     return (
       <div className="app-shell">
-        <Sidebar active="Dashboard" />
+        <Sidebar active="Roadmap" />
         <div className="app-main">
           <div className="app-content">
             <p>No analysis data to report on. Analyze a CV first.</p>
@@ -43,12 +58,6 @@ export default function ReportPage() {
     );
   }
 
-  const { extracted_skills: extractedSkills, role_fit: roleFit, recommended_role: roadmap } = result;
-  const topRole = roleFit[0];
-  const allMissingSkills = roadmap.learning_order.flatMap((group) =>
-    group.skills.map((s) => ({ ...s, priority: group.priority }))
-  );
-  const completedCount = allMissingSkills.filter((s) => completedSkills.includes(s.skill)).length;
   const today = new Date().toLocaleDateString(undefined, {
     day: "2-digit",
     month: "short",
@@ -57,7 +66,7 @@ export default function ReportPage() {
 
   return (
     <div className="app-shell">
-      <Sidebar active="Dashboard" />
+      <Sidebar active="Roadmap" />
 
       <div className="app-main">
         <header className="app-topbar">
@@ -66,8 +75,8 @@ export default function ReportPage() {
             <div className="app-topbar-subtitle">Generated {today}</div>
           </div>
           <div className="app-topbar-actions no-print">
-            <Link to="/dashboard" className="btn">
-              Back to Dashboard
+            <Link to="/roadmap" className="btn">
+              Back to Roadmap
             </Link>
             <button className="btn btn-primary" onClick={() => window.print()}>
               Print / Save as PDF
@@ -80,7 +89,7 @@ export default function ReportPage() {
             <div className="report-doc-header">
               <div>
                 <div className="report-doc-title">Career Readiness Report</div>
-                {userName && <div className="report-doc-subtitle">{userName}</div>}
+                {user?.name && <div className="report-doc-subtitle">{user.name}</div>}
               </div>
               <div className="report-doc-meta">
                 SKILLMATCH AI
@@ -92,34 +101,34 @@ export default function ReportPage() {
             <div className="report-strip">
               <div className="report-strip-cell">
                 <div className="report-strip-label">TARGET ROLE</div>
-                <div className="report-strip-value">{topRole.role_name}</div>
+                <div className="report-strip-value">{stats.topRole.role_name}</div>
               </div>
               <div className="report-strip-cell">
                 <div className="report-strip-label">ROLE FIT</div>
                 <div className="report-strip-value report-strip-value-mono">
-                  {topRole.fit_score_percent}%
+                  {stats.topRole.fit_score_percent}%
                 </div>
               </div>
             </div>
 
             <div className="report-section">
               <div className="report-section-title">1. Summary</div>
-              <div className="report-section-body">{roadmap.readiness_summary}</div>
+              <div className="report-section-body">{stats.roadmap.readiness_summary}</div>
             </div>
 
             <div className="report-two-col">
               <div className="report-section">
                 <div className="report-section-title">2. Confirmed skills</div>
-                <div className="report-section-body">{extractedSkills.join(" · ")}</div>
+                <div className="report-section-body">{stats.extractedSkills.join(" · ")}</div>
               </div>
 
               <div className="report-section">
                 <div className="report-section-title">3. Priority gaps</div>
-                {allMissingSkills.length === 0 ? (
+                {stats.allMissingSkills.length === 0 ? (
                   <div className="report-section-body">No skill gaps - fully matched.</div>
                 ) : (
                   <div className="report-gap-list">
-                    {allMissingSkills.map((s) => {
+                    {stats.allMissingSkills.map((s) => {
                       const isDone = completedSkills.includes(s.skill);
                       return (
                         <div className="report-gap-row" key={s.skill}>
@@ -138,11 +147,13 @@ export default function ReportPage() {
             <div className="report-section">
               <div className="report-section-title">4. Recommended plan</div>
               <div className="report-section-body">
-                {completedCount} of {allMissingSkills.length} roadmap skills complete.{" "}
-                {roadmap.recommended_resources.map((r) => r.title).join(", ")}
-                {roadmap.recommended_resources.length > 0 && roadmap.suggested_projects.length > 0 && " · "}
-                {roadmap.suggested_projects.length > 0 &&
-                  `Suggested portfolio work: ${roadmap.suggested_projects.join("; ")}.`}
+                {stats.completedCount} of {stats.allMissingSkills.length} roadmap skills complete.{" "}
+                {stats.roadmap.recommended_resources.map((r) => r.title).join(", ")}
+                {stats.roadmap.recommended_resources.length > 0 &&
+                  stats.roadmap.suggested_projects.length > 0 &&
+                  " · "}
+                {stats.roadmap.suggested_projects.length > 0 &&
+                  `Suggested portfolio work: ${stats.roadmap.suggested_projects.join("; ")}.`}
               </div>
             </div>
 

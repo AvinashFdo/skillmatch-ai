@@ -167,6 +167,21 @@ a:hover {
   cursor: not-allowed;
 }
 
+/* `:disabled` only applies to real form controls - the Dashboard's quick
+   nav links to Skills/Roles/Roadmap are anchors, disabled via
+   aria-disabled + a click-preventDefault guard instead, since a link
+   can't carry the `disabled` attribute. */
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dashboard-nav-links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 /* ==========================================================================
    App shell - sidebar + top-bar + content, structurally lifted from
    FIG 12 (the one screen with real inline sidebar markup - every other
@@ -729,6 +744,17 @@ a:hover {
   gap: 14px;
 }
 
+.role-fit-target-badge {
+  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  padding: 1px 6px;
+  vertical-align: middle;
+}
+
 .role-fit-score-bar {
   display: flex;
   align-items: center;
@@ -832,6 +858,73 @@ a:hover {
 }
 
 /* ==========================================================================
+   Dashboard profile panel
+   ========================================================================== */
+
+.profile-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--color-border-hairline);
+  font-size: 13px;
+}
+
+.profile-detail-row:last-child {
+  border-bottom: none;
+}
+
+.profile-detail-label {
+  color: var(--color-text-label);
+  font-weight: 500;
+}
+
+.profile-detail-value {
+  color: var(--color-text-secondary);
+}
+
+.profile-edit-form {
+  padding-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.profile-edit-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-label);
+}
+
+.profile-edit-form input {
+  padding: 10px 12px;
+  border: 1px solid var(--color-input-border);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+}
+
+.profile-edit-form input:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.profile-edit-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ==========================================================================
    Recommended role + readiness
    ========================================================================== */
 
@@ -851,6 +944,16 @@ a:hover {
   border: 1px solid var(--color-accent-tint-border);
   padding: 6px 10px;
   letter-spacing: 0.02em;
+}
+
+.roadmap-estimate {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.roadmap-estimate a {
+  color: var(--color-accent);
 }
 
 /* ==========================================================================
