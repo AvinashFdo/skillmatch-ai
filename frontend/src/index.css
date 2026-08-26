@@ -903,6 +903,7 @@ a:hover {
 }
 
 .priority-checklist-row {
+  position: relative;
   padding: 13px 18px;
   border-bottom: 1px solid var(--color-border-hairline);
   display: flex;
