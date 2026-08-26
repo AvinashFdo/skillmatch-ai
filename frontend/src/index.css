@@ -1076,6 +1076,12 @@ a:hover {
   text-transform: uppercase;
 }
 
+.priority-checklist-carried-over {
+  font-size: 10.5px;
+  font-style: italic;
+  color: var(--color-text-faint);
+}
+
 .fully-matched-banner {
   display: flex;
   align-items: center;

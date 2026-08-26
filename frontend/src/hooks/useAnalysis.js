@@ -26,6 +26,14 @@ export default function useAnalysis() {
 
   const [result, setResult] = useState(null);
   const [completedSkills, setCompletedSkills] = useState([]);
+  // A frozen snapshot of completedSkills as it was the moment this page's
+  // data finished loading - never updated by toggleSkill afterward. Lets
+  // the UI tell "was already complete before this page loaded" (e.g.
+  // carried over from a previous analysis under a different top role -
+  // see the completedSkills investigation in CLAUDE_LOG.md) apart from
+  // "checked just now in this session", without needing any new API call
+  // or touching the completedSkills data model itself.
+  const [initialCompletedSkills, setInitialCompletedSkills] = useState([]);
   const [profile, setProfile] = useState({ programme: "", year: "", studyHoursPerWeek: null });
   const [loading, setLoading] = useState(true);
 
@@ -59,6 +67,7 @@ export default function useAnalysis() {
         if (cancelled) return;
         setResult(analysisRes.data);
         setCompletedSkills(meRes.data.completedSkills || []);
+        setInitialCompletedSkills(meRes.data.completedSkills || []);
         setProfile({
           programme: meRes.data.programme || "",
           year: meRes.data.year || "",
@@ -115,6 +124,7 @@ export default function useAnalysis() {
     result,
     setResult,
     completedSkills,
+    initialCompletedSkills,
     profile,
     updateProfile,
     loading,

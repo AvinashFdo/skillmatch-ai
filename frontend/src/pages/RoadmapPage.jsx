@@ -16,7 +16,7 @@ import { computeAnalysisStats, estimateRoadmapWeeks } from "../utils/analysisSta
  * page split rather than assumed (see CLAUDE_LOG.md).
  */
 export default function RoadmapPage() {
-  const { result, completedSkills, profile, loading, toggleSkill } = useAnalysis();
+  const { result, completedSkills, initialCompletedSkills, profile, loading, toggleSkill } = useAnalysis();
   const navigate = useNavigate();
   const stats = computeAnalysisStats(result, completedSkills);
   const estimate = result
@@ -95,6 +95,15 @@ export default function RoadmapPage() {
                       <div>
                         {group.skills.map((s) => {
                           const isDone = completedSkills.includes(s.skill);
+                          // "Carried over" = already complete before this
+                          // page's data loaded, not just checked in this
+                          // session - see the completedSkills investigation
+                          // in CLAUDE_LOG.md (completedSkills is global/
+                          // role-agnostic by deliberate design, so a skill
+                          // completed under a previous top role can show
+                          // up pre-checked here; this hint just makes that
+                          // visible instead of silent).
+                          const wasCarriedOver = isDone && initialCompletedSkills.includes(s.skill);
                           return (
                             <label
                               className={`priority-checklist-row ${isDone ? "priority-checklist-row-done" : ""}`}
@@ -110,6 +119,11 @@ export default function RoadmapPage() {
                               <span className="priority-checklist-label">
                                 <span className="priority-checklist-skill">{s.skill}</span>
                                 <span className="priority-checklist-category">{s.category}</span>
+                                {wasCarriedOver && (
+                                  <span className="priority-checklist-carried-over">
+                                    Previously marked complete
+                                  </span>
+                                )}
                               </span>
                             </label>
                           );
