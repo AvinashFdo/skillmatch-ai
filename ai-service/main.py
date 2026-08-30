@@ -94,13 +94,15 @@ def rescore(request: RescoreRequest):
     """
     Re-runs role-fit scoring and roadmap generation for an already-known
     skill list (no text extraction). Used by the backend's /cv/correction
-    route to fold a manually-added skill into an existing analysis's
-    Role Matches/Roadmap without needing the original CV text, which the
-    backend never persists.
-    """
-    if not request.skills:
-        raise HTTPException(status_code=400, detail="skills must not be empty.")
+    and /user/progress routes to fold a manually-added or completed
+    skill into an existing analysis's Role Matches/Roadmap without
+    needing the original CV text, which the backend never persists.
 
+    An empty list is valid (not a 400) - it's the correct input when
+    /user/progress reverses the LAST completed/corrected skill still
+    present, and scores identically to a candidate with zero extracted
+    skills: every required skill just falls into "missing".
+    """
     try:
         return rescore_skills(request.skills)
     except Exception as exc:

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import StepIndicator from "../components/StepIndicator";
 import useAnalysis from "../hooks/useAnalysis";
 
 /**
@@ -24,6 +25,7 @@ export default function RolesPage() {
             <div className="app-topbar-title">Role matches</div>
             <div className="app-topbar-subtitle">How you score against each entry-level IT role</div>
           </div>
+          <StepIndicator current={3} />
         </header>
 
         <div className="app-content">

@@ -1245,6 +1245,15 @@ a:hover {
   padding: 28px 0;
   display: flex;
   justify-content: center;
+  /* Unlike every other page's content area, .report-shell is a sibling of
+     .app-topbar directly inside .app-main - NOT wrapped in .app-content
+     (which already has this same overflow-y: auto) - so without this,
+     .app-main's own `overflow: hidden` (see the sidebar-pin fix above)
+     clips the report to the viewport instead of letting it scroll,
+     while the print stylesheet's `overflow: visible` override for
+     .app-shell/.app-main (see @media print below) is what makes
+     Print/Save as PDF unaffected either way. */
+  overflow-y: auto;
 }
 
 .report-doc {
@@ -1649,10 +1658,23 @@ a:hover {
   flex-wrap: wrap;
 }
 
-.step-indicator-item {
+.step-indicator-item,
+.step-indicator-item:hover {
   display: flex;
   align-items: center;
   gap: 8px;
+  /* Every step is now a react-router <Link> (an <a>), so the same
+     specificity problem documented on .btn/.btn-primary above applies
+     here too: the global `a { color: ... }` / `a:hover { color: ...;
+     text-decoration: underline }` rules would otherwise win over this
+     class's inherited color from .step-indicator, making inactive steps
+     render accent-blue+underlined instead of faint grey. Re-asserting
+     color/text-decoration at this class's own specificity (matching it
+     on both the base and :hover selector, same pattern as .btn-primary)
+     keeps every step's color governed by whether it's
+     .step-indicator-item-active, not by link-hover state. */
+  color: inherit;
+  text-decoration: none;
 }
 
 .step-indicator-circle {
@@ -1667,7 +1689,8 @@ a:hover {
   justify-content: center;
 }
 
-.step-indicator-item-active {
+.step-indicator-item-active,
+.step-indicator-item-active:hover {
   color: var(--color-text);
   font-weight: 600;
 }

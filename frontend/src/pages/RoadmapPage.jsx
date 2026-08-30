@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import StepIndicator from "../components/StepIndicator";
 import useAnalysis from "../hooks/useAnalysis";
 import { computeAnalysisStats, estimateRoadmapWeeks } from "../utils/analysisStats";
 
@@ -33,6 +34,7 @@ export default function RoadmapPage() {
             <div className="app-topbar-title">Roadmap</div>
             <div className="app-topbar-subtitle">Your prioritized plan for the recommended role</div>
           </div>
+          <StepIndicator current={4} />
         </header>
 
         <div className="app-content">

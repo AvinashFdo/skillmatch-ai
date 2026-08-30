@@ -1,5 +1,6 @@
 const express = require("express");
 const User = require("../models/User");
+const { rescoreAndPersist } = require("../utils/rescoreAnalysis");
 
 const router = express.Router();
 
@@ -131,8 +132,23 @@ router.delete("/analysis", async (req, res, next) => {
 /**
  * PATCH /api/user/progress
  * Toggles a single skill name in the user's completedSkills array -
- * adds it if not present, removes it if already there. Returns the
- * updated array so the frontend doesn't need a separate re-fetch.
+ * adds it if not present, removes it if already there.
+ *
+ * Also folds the skill into (or out of) the user's persisted
+ * lastAnalysis and re-scores, via the exact same rescoreAndPersist()
+ * helper the /cv/correction route uses - completing a roadmap skill is
+ * treated as "the user has now demonstrated this skill", so it counts
+ * as matched for Role Matches/Skills/Dashboard the same way a manual
+ * correction does. Reversible, unlike a correction: unchecking removes
+ * the skill again and re-scores back to the prior state.
+ *
+ * This is provably safe to do unconditionally (no "was this really
+ * added by completion?" tracking needed): a skill can only be checked
+ * complete from the roadmap page while it's still MISSING for the
+ * user's top role - i.e. NOT already in extracted_skills - so the only
+ * way it can be present in extracted_skills afterward is because this
+ * exact toggle-on step put it there. Toggling off can therefore always
+ * safely remove it.
  */
 router.patch("/progress", async (req, res, next) => {
   const { skill } = req.body;
@@ -140,6 +156,7 @@ router.patch("/progress", async (req, res, next) => {
   if (!skill || !skill.trim()) {
     return res.status(400).json({ error: "skill is required." });
   }
+  const trimmedSkill = skill.trim();
 
   try {
     const user = await User.findById(req.user.userId);
@@ -147,16 +164,42 @@ router.patch("/progress", async (req, res, next) => {
       return res.status(404).json({ error: "User not found." });
     }
 
-    const index = user.completedSkills.indexOf(skill);
-    if (index === -1) {
-      user.completedSkills.push(skill);
+    const index = user.completedSkills.indexOf(trimmedSkill);
+    const isCompleting = index === -1;
+    if (isCompleting) {
+      user.completedSkills.push(trimmedSkill);
     } else {
       user.completedSkills.splice(index, 1);
     }
-
     await user.save();
-    res.json({ completedSkills: user.completedSkills });
+
+    let updatedAnalysis = user.lastAnalysis;
+    if (user.lastAnalysis) {
+      const currentSkills = user.lastAnalysis.extracted_skills || [];
+      const alreadyPresent = currentSkills.some(
+        (s) => s.toLowerCase() === trimmedSkill.toLowerCase()
+      );
+
+      if (isCompleting && !alreadyPresent) {
+        updatedAnalysis = await rescoreAndPersist(user, [...currentSkills, trimmedSkill]);
+      } else if (!isCompleting && alreadyPresent) {
+        const withoutSkill = currentSkills.filter(
+          (s) => s.toLowerCase() !== trimmedSkill.toLowerCase()
+        );
+        updatedAnalysis = await rescoreAndPersist(user, withoutSkill);
+      }
+    }
+
+    res.json({ completedSkills: user.completedSkills, analysis: updatedAnalysis });
   } catch (err) {
+    if (err.code === "ECONNREFUSED") {
+      return res.status(503).json({
+        error: "AI service is unreachable. Is it running at " + process.env.AI_SERVICE_URL + "?",
+      });
+    }
+    if (err.response) {
+      return res.status(err.response.status).json(err.response.data);
+    }
     next(err);
   }
 });

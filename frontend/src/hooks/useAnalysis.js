@@ -103,6 +103,14 @@ export default function useAnalysis() {
     try {
       const res = await apiClient.patch("/user/progress", { skill }, authHeaders);
       setCompletedSkills(res.data.completedSkills);
+      // The backend folds a completed skill into lastAnalysis and
+      // re-scores Role Matches/Roadmap against it (same mechanism as a
+      // manual correction - see cv.js/user.js) - update this page's
+      // `result` immediately so Roadmap's own readiness/checklist react
+      // right away, without waiting for a future remount's refetch.
+      if (res.data.analysis) {
+        setResult(res.data.analysis);
+      }
     } catch (err) {
       // Revert the optimistic update on failure.
       setCompletedSkills((prev) =>

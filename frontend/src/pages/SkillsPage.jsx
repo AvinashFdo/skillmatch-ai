@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import StepIndicator from "../components/StepIndicator";
 import useAnalysis from "../hooks/useAnalysis";
 import { computeAnalysisStats } from "../utils/analysisStats";
 
@@ -70,6 +71,7 @@ export default function SkillsPage() {
             <div className="app-topbar-title">Skills</div>
             <div className="app-topbar-subtitle">Skills identified from your CV</div>
           </div>
+          <StepIndicator current={2} />
         </header>
 
         <div className="app-content">

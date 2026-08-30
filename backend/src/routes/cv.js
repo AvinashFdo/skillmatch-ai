@@ -6,6 +6,7 @@ const FormData = require("form-data");
 const requireAuth = require("../middleware/auth");
 const CorrectionLog = require("../models/CorrectionLog");
 const User = require("../models/User");
+const { rescoreAndPersist } = require("../utils/rescoreAnalysis");
 
 const router = express.Router();
 
@@ -183,18 +184,7 @@ router.post("/correction", requireAuth, async (req, res, next) => {
     }
 
     const updatedSkills = [...currentSkills, trimmedSkill];
-    const rescoreResponse = await axios.post(`${process.env.AI_SERVICE_URL}/rescore`, {
-      skills: updatedSkills,
-    });
-
-    const updatedAnalysis = {
-      ...user.lastAnalysis,
-      extracted_skills: rescoreResponse.data.extracted_skills,
-      role_fit: rescoreResponse.data.role_fit,
-      recommended_role: rescoreResponse.data.recommended_role,
-    };
-
-    await User.findByIdAndUpdate(req.user.userId, { lastAnalysis: updatedAnalysis });
+    const updatedAnalysis = await rescoreAndPersist(user, updatedSkills);
     res.json({ logged: true, analysis: updatedAnalysis });
   } catch (err) {
     if (err.code === "ECONNREFUSED") {

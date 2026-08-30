@@ -4,6 +4,7 @@ import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
 import Modal from "../components/Modal";
+import StepIndicator from "../components/StepIndicator";
 import useAnalysis from "../hooks/useAnalysis";
 
 function formatFileSize(bytes) {
@@ -204,22 +205,7 @@ export default function CvProfilePage() {
             <div className="app-topbar-title">CV &amp; Profile</div>
             <div className="app-topbar-subtitle">Paste your CV or upload a file, and keep your profile up to date</div>
           </div>
-          <div className="step-indicator" aria-label="Step 1 of 3: Upload">
-            <div className="step-indicator-item step-indicator-item-active">
-              <span className="step-indicator-circle">1</span>
-              <span>Upload</span>
-            </div>
-            <div className="step-indicator-connector" />
-            <div className="step-indicator-item">
-              <span className="step-indicator-circle">2</span>
-              <span>Skills</span>
-            </div>
-            <div className="step-indicator-connector" />
-            <div className="step-indicator-item">
-              <span className="step-indicator-circle">3</span>
-              <span>Roles</span>
-            </div>
-          </div>
+          <StepIndicator current={1} />
         </header>
 
         <div className="app-content">
