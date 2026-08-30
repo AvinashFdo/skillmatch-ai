@@ -3,6 +3,36 @@ import { useNavigate } from "react-router-dom";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
+import Modal from "../components/Modal";
+
+// Small inline icons rather than an icon library - only two are needed
+// here, and the app already has no other icon usage to justify the
+// dependency. 14x14, stroke-only (currentColor), matching the flat/
+// minimal look used everywhere else in this design system.
+function EditIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M11.3 1.7a1.5 1.5 0 0 1 2.12 0l.88.88a1.5 1.5 0 0 1 0 2.12L5.5 13.4l-3.5.9.9-3.5 8.4-9.1Z"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+      <path d="M9.5 3.5 12.5 6.5" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M2.5 4.5h11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M6 4.5V2.7c0-.4.3-.7.7-.7h2.6c.4 0 .7.3.7.7v1.8" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M4 4.5 4.6 13c0 .6.5 1 1 1h4.8c.5 0 1-.4 1-1l.6-8.5" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M6.5 7v4.5M9.5 7v4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 // Deliberately simple text formats instead of nested add/remove-row
 // forms, per the "minimal/fast, no polish" scope for this admin panel:
@@ -93,6 +123,8 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -171,14 +203,24 @@ export default function AdminPage() {
     }
   }
 
-  async function handleDelete(roleId) {
+  function handleDeleteClick(role) {
+    setDeleteTarget(role);
+  }
+
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
     setError("");
+    setDeleting(true);
     try {
-      await apiClient.delete(`/admin/roles/${roleId}`, authHeaders);
-      if (editingId === roleId) cancelEdit();
+      await apiClient.delete(`/admin/roles/${deleteTarget._id}`, authHeaders);
+      if (editingId === deleteTarget._id) cancelEdit();
       await loadRoles();
+      setDeleteTarget(null);
     } catch (err) {
       setError(err.response?.data?.error || "Delete failed. Please try again.");
+      setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -216,8 +258,22 @@ export default function AdminPage() {
                     <div className="data-table-figure">{(role.soft_skills || []).length}</div>
                     <div className="data-table-figure">{(role.learning_resources || []).length}</div>
                     <div className="admin-table-actions">
-                      <button onClick={() => startEdit(role)}>Edit</button>
-                      <button onClick={() => handleDelete(role._id)}>Delete</button>
+                      <button
+                        className="admin-icon-btn"
+                        onClick={() => startEdit(role)}
+                        title={`Edit ${role.role_name}`}
+                        aria-label={`Edit ${role.role_name}`}
+                      >
+                        <EditIcon />
+                      </button>
+                      <button
+                        className="admin-icon-btn admin-icon-btn-delete"
+                        onClick={() => handleDeleteClick(role)}
+                        title={`Delete ${role.role_name}`}
+                        aria-label={`Delete ${role.role_name}`}
+                      >
+                        <TrashIcon />
+                      </button>
                     </div>
                   </div>
                 ))
@@ -304,6 +360,20 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
+
+      <Modal
+        open={Boolean(deleteTarget)}
+        title="Delete role?"
+        message={
+          deleteTarget &&
+          `Delete ${deleteTarget.role_name}? This will permanently remove this role and its skills. This cannot be undone.`
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+        confirming={deleting}
+      />
     </div>
   );
 }

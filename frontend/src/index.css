@@ -1254,6 +1254,16 @@ a:hover {
      .app-shell/.app-main (see @media print below) is what makes
      Print/Save as PDF unaffected either way. */
   overflow-y: auto;
+  /* A flex container's children default to align-items: stretch on the
+     cross axis - so .report-doc (the white card) was being stretched to
+     exactly .report-shell's own (viewport-constrained) height, rather
+     than sizing to its own content. Report content taller than the
+     viewport still rendered (default overflow: visible, nothing was
+     literally clipped) but past the white card's own stretched-short
+     background/border, so it visually spilled onto the grey page
+     background instead of staying inside the card. flex-start lets
+     .report-doc size to its actual content height instead. */
+  align-items: flex-start;
 }
 
 .report-doc {
@@ -1562,19 +1572,35 @@ a:hover {
   text-align: right;
 }
 
-.admin-table-actions button {
+.admin-icon-btn {
   margin-left: 8px;
-  height: 26px;
-  padding: 0 10px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--color-input-border);
   background: var(--color-surface);
-  font-size: 11px;
-  font-weight: 500;
   color: var(--color-text-secondary);
 }
 
-.admin-table-actions button:hover {
+.admin-icon-btn:hover {
   border-color: var(--color-text);
+  color: var(--color-text);
+}
+
+/* Delete uses the same coral/warning tone as high-priority elsewhere in
+   the app (--color-high*), rather than a fresh color, so "destructive"
+   reads consistently across the app. */
+.admin-icon-btn-delete {
+  color: var(--color-high);
+}
+
+.admin-icon-btn-delete:hover {
+  border-color: var(--color-high-border);
+  background: var(--color-high-bg);
+  color: var(--color-high-text-on-tint);
 }
 
 @media (max-width: 900px) {
