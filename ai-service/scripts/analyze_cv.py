@@ -64,6 +64,15 @@ def analyze_cv(cv_text: str) -> dict:
         "extracted_skills": matched_skills,
         "role_fit": role_fit_results,
         "recommended_role": roadmap,
+        # Real pipeline numbers for the frontend's "honest pipeline
+        # breakdown" display (CV & Profile page) - word_count is of
+        # whatever text was actually analyzed (pasted or extracted from
+        # a file, the caller doesn't need to distinguish here since
+        # cv_text is already just a string either way), and
+        # skill_dictionary_size is extraction["total_dictionary_skills_checked"]
+        # under a clearer name for API consumers outside this module.
+        "word_count": len(cv_text.split()),
+        "skill_dictionary_size": extraction["total_dictionary_skills_checked"],
     }
 
 

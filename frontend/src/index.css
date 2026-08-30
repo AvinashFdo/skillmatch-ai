@@ -1622,3 +1622,142 @@ a:hover {
     padding: 24px 18px;
   }
 }
+
+/* ==========================================================================
+   CV & Profile - step indicator (FIG 03 pattern)
+   ========================================================================== */
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--color-text-faint);
+  flex-wrap: wrap;
+}
+
+.step-indicator-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-indicator-circle {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border: 1px solid var(--color-input-border);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-indicator-item-active {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.step-indicator-item-active .step-indicator-circle {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.step-indicator-connector {
+  width: 24px;
+  height: 1px;
+  background: var(--color-input-border);
+  flex: none;
+}
+
+/* ==========================================================================
+   CV & Profile - file metadata + honest pipeline breakdown
+   ========================================================================== */
+
+.file-info-panel {
+  border: 1px solid var(--color-border);
+  padding: 14px 16px;
+}
+
+.file-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.file-info-name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-info-size {
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  flex: none;
+  padding-left: 12px;
+}
+
+.file-info-caption {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  color: var(--color-accent);
+}
+
+.pipeline-log {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pipeline-log-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border-hairline);
+}
+
+.pipeline-log-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.pipeline-log-step {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.pipeline-log-detail {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.pipeline-note {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--color-text-tertiary);
+}
+
+.data-handling-card {
+  background: var(--color-accent-tint-bg);
+  border-color: var(--color-accent-tint-border);
+}
+
+.data-handling-card .mono-label {
+  color: var(--color-accent-tint-text);
+}
+
+.data-handling-card p {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0;
+}

@@ -20,14 +20,17 @@ class FileExtractionError(Exception):
     intended to be shown directly to the user."""
 
 
-def extract_text_from_pdf(file_bytes: bytes) -> str:
-    """Extracts and concatenates text from every page of a PDF."""
+def extract_text_from_pdf(file_bytes: bytes) -> tuple:
+    """Extracts and concatenates text from every page of a PDF. Returns
+    (text, page_count) - page_count comes for free from the already-open
+    pymupdf Document, no extra parsing pass needed."""
     try:
         with pymupdf.open(stream=file_bytes, filetype="pdf") as doc:
             if doc.is_encrypted:
                 raise FileExtractionError(
                     "This PDF is password-protected. Please upload an unprotected file."
                 )
+            page_count = doc.page_count
             pages_text = [page.get_text() for page in doc]
     except FileExtractionError:
         raise
@@ -36,11 +39,14 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
             f"Could not read this PDF - it may be corrupted or not a valid PDF file. ({exc})"
         )
 
-    return "\n".join(pages_text)
+    return "\n".join(pages_text), page_count
 
 
-def extract_text_from_docx(file_bytes: bytes) -> str:
-    """Extracts and concatenates text from every paragraph of a DOCX."""
+def extract_text_from_docx(file_bytes: bytes) -> tuple:
+    """Extracts and concatenates text from every paragraph of a DOCX.
+    Returns (text, None) - python-docx has no page-count concept (that's
+    a rendering-time detail Word computes, not stored in the file), so
+    unlike PDF there's no honest number to report here."""
     try:
         document = Document(io.BytesIO(file_bytes))
         paragraphs_text = [p.text for p in document.paragraphs]
@@ -49,22 +55,26 @@ def extract_text_from_docx(file_bytes: bytes) -> str:
             f"Could not read this DOCX file - it may be corrupted or not a valid .docx file. ({exc})"
         )
 
-    return "\n".join(paragraphs_text)
+    return "\n".join(paragraphs_text), None
 
 
-def extract_text_from_file(filename: str, file_bytes: bytes) -> str:
+def extract_text_from_file(filename: str, file_bytes: bytes) -> dict:
     """
     Dispatches to the right extractor based on file extension, then
     validates the result isn't empty (e.g. a scanned/image-only PDF
     with no selectable text would otherwise silently produce nothing
     for analyze_cv() to work with).
+
+    Returns {"text": str, "page_count": int | None} - page_count is only
+    ever a real number for PDFs; DOCX always reports None (see
+    extract_text_from_docx).
     """
     lowered = filename.lower()
 
     if lowered.endswith(".pdf"):
-        text = extract_text_from_pdf(file_bytes)
+        text, page_count = extract_text_from_pdf(file_bytes)
     elif lowered.endswith(".docx"):
-        text = extract_text_from_docx(file_bytes)
+        text, page_count = extract_text_from_docx(file_bytes)
     else:
         raise FileExtractionError(
             "Unsupported file type. Please upload a .pdf or .docx file."
@@ -76,4 +86,4 @@ def extract_text_from_file(filename: str, file_bytes: bytes) -> str:
             "PDF, text extraction won't work - try pasting the CV text directly instead."
         )
 
-    return text
+    return {"text": text, "page_count": page_count}

@@ -93,8 +93,18 @@ router.post("/analyze-file", requireAuth, (req, res, next) => {
         formData,
         { headers: formData.getHeaders() }
       );
-      await User.findByIdAndUpdate(req.user.userId, { lastAnalysis: aiResponse.data });
-      res.json(aiResponse.data);
+      // The AI service only ever sees the file's bytes and the name we
+      // pass it above - it has no idea what the original upload's size
+      // was (multer already knows both from req.file), so the original
+      // filename/size are merged in here rather than round-tripped
+      // through the AI service for no reason.
+      const responseData = {
+        ...aiResponse.data,
+        fileName: req.file.originalname,
+        fileSize: req.file.size,
+      };
+      await User.findByIdAndUpdate(req.user.userId, { lastAnalysis: responseData });
+      res.json(responseData);
     } catch (aiErr) {
       if (aiErr.code === "ECONNREFUSED") {
         return res.status(503).json({

@@ -1,9 +1,17 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
 import useAnalysis from "../hooks/useAnalysis";
+
+function formatFileSize(bytes) {
+  if (bytes === null || bytes === undefined) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${Math.round(kb)} KB`;
+  return `${(kb / 1024).toFixed(1)} MB`;
+}
 
 /**
  * CV & Profile page - matches design_reference.html's actual page
@@ -14,12 +22,23 @@ import useAnalysis from "../hooks/useAnalysis";
  * inputs and the Profile details panel, both moved here from what used
  * to be inline on Dashboard.
  *
- * Analyzing (either method) still auto-navigates to /skills afterward,
- * same behavior as before - just triggered from here now instead of
- * from Dashboard, since this is where the actual analyze action lives
- * structurally. /skills remains the right landing spot: it's still the
- * natural first thing to check after an analysis, regardless of which
- * page kicked it off.
+ * Design decision (confirmed with the project owner before building):
+ * analyzing no longer auto-navigates to /skills. The reference's own
+ * FIG 03 shows a manual "Continue to skill validation" step, not an
+ * auto-redirect - and this page now needs to actually display the
+ * analysis results (file metadata, pipeline breakdown) right after
+ * analyzing, which an instant redirect would cut off before the user
+ * could see it. The user reviews the results here, then moves on via
+ * the sidebar or the "Continue to Skills" link whenever ready.
+ *
+ * The results panel reads directly off `result` from useAnalysis()
+ * rather than separate local state - result.word_count and
+ * result.skill_dictionary_size come back from EVERY analysis (text or
+ * file - see analyze_cv.py), and result.fileName/fileSize/page_count
+ * only exist for file-based analyses (added by cv.js/main.py
+ * respectively). Since this is the same persisted result every other
+ * page reads, a refresh of this page keeps showing the last analysis's
+ * real numbers too - not just a one-time toast.
  */
 export default function CvProfilePage() {
   const { token, logout } = useAuth();
@@ -95,7 +114,6 @@ export default function CvProfilePage() {
     try {
       const res = await apiClient.post("/cv/analyze", { cv_text: cvText }, authHeaders);
       setResult(res.data);
-      navigate("/skills");
     } catch (err) {
       if (err.response?.status === 401) {
         logout();
@@ -125,7 +143,6 @@ export default function CvProfilePage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setResult(res.data);
-      navigate("/skills");
     } catch (err) {
       if (err.response?.status === 401) {
         logout();
@@ -164,6 +181,16 @@ export default function CvProfilePage() {
     }
   }
 
+  const isFileAnalysis = Boolean(result?.fileName);
+  const fileIsPdf = isFileAnalysis && result.fileName.toLowerCase().endsWith(".pdf");
+  // word_count/skill_dictionary_size were added to the analyze pipeline
+  // alongside this panel - an analysis saved before that change (an
+  // older lastAnalysis already persisted for an existing account) won't
+  // have them. Guard rather than assume, so re-visiting this page with
+  // old data shows a graceful fallback instead of crashing on
+  // `undefined.toLocaleString()`.
+  const hasPipelineMeta = result && typeof result.word_count === "number" && typeof result.skill_dictionary_size === "number";
+
   return (
     <div className="app-shell">
       <Sidebar active="CV & Profile" />
@@ -173,6 +200,22 @@ export default function CvProfilePage() {
           <div className="app-topbar-heading">
             <div className="app-topbar-title">CV &amp; Profile</div>
             <div className="app-topbar-subtitle">Paste your CV or upload a file, and keep your profile up to date</div>
+          </div>
+          <div className="step-indicator" aria-label="Step 1 of 3: Upload">
+            <div className="step-indicator-item step-indicator-item-active">
+              <span className="step-indicator-circle">1</span>
+              <span>Upload</span>
+            </div>
+            <div className="step-indicator-connector" />
+            <div className="step-indicator-item">
+              <span className="step-indicator-circle">2</span>
+              <span>Skills</span>
+            </div>
+            <div className="step-indicator-connector" />
+            <div className="step-indicator-item">
+              <span className="step-indicator-circle">3</span>
+              <span>Roles</span>
+            </div>
           </div>
         </header>
 
@@ -247,22 +290,6 @@ export default function CvProfilePage() {
             </section>
           )}
 
-          {!loading && result && (
-            <section className="card reset-analysis-card">
-              <div className="card-title">Start fresh</div>
-              <p>
-                Clear your current analysis and progress to analyze a new CV from scratch. Your profile
-                details (Programme, Year, Study time) are kept.
-              </p>
-              <div style={{ marginTop: 10 }}>
-                <button className="btn" onClick={handleResetAnalysis} disabled={resetting}>
-                  {resetting ? "Clearing..." : "Start fresh with a new CV"}
-                </button>
-              </div>
-              {resetError && <p className="error-text">{resetError}</p>}
-            </section>
-          )}
-
           <section className="card upload-section">
             <div className="card-title">Paste your CV</div>
             <textarea
@@ -290,6 +317,103 @@ export default function CvProfilePage() {
               </button>
             </div>
             {fileError && <p className="error-text">{fileError}</p>}
+          </section>
+
+          {!loading && result && (
+            <section className="card">
+              <div className="card-title">Analysis complete</div>
+
+              {isFileAnalysis && (
+                <div className="file-info-panel">
+                  <div className="file-info-row">
+                    <span className="file-info-name">{result.fileName}</span>
+                    <span className="file-info-size">{formatFileSize(result.fileSize)}</span>
+                  </div>
+                  {hasPipelineMeta && (
+                    <div className="file-info-caption">
+                      TEXT EXTRACTED · {result.word_count.toLocaleString()} WORDS
+                      {fileIsPdf && result.page_count ? ` · ${result.page_count} PAGES` : ""}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {hasPipelineMeta ? (
+                <>
+                  <div className="pipeline-log">
+                    <div className="pipeline-log-row">
+                      <span className="pipeline-log-step">Text extraction</span>
+                      <span className="pipeline-log-detail">
+                        {isFileAnalysis
+                          ? `Extracted from ${fileIsPdf ? "PDF" : "DOCX"} - ${result.word_count.toLocaleString()} words`
+                          : `From pasted text - ${result.word_count.toLocaleString()} words`}
+                      </span>
+                    </div>
+                    <div className="pipeline-log-row">
+                      <span className="pipeline-log-step">Preprocessing</span>
+                      <span className="pipeline-log-detail">Lowercased, whitespace normalized</span>
+                    </div>
+                    <div className="pipeline-log-row">
+                      <span className="pipeline-log-step">Dictionary matching</span>
+                      <span className="pipeline-log-detail">
+                        {result.extracted_skills.length} skill{result.extracted_skills.length === 1 ? "" : "s"} matched
+                        against a {result.skill_dictionary_size}-term skill dictionary
+                      </span>
+                    </div>
+                  </div>
+                  <p className="pipeline-note">
+                    Matching uses exact-term dictionary lookup (case-insensitive, word-boundary-safe), not fuzzy or
+                    confidence-based matching - every skill above is a literal occurrence of a known skill name found
+                    in your CV text. Missed a skill? Add it manually on the Skills page.
+                  </p>
+                </>
+              ) : (
+                <p className="pipeline-note">
+                  {result.extracted_skills.length} skill{result.extracted_skills.length === 1 ? "" : "s"} extracted
+                  from your last analysis. (Detailed pipeline numbers aren't available for analyses run before this
+                  feature was added - re-analyze your CV to see them.)
+                </p>
+              )}
+
+              <div style={{ marginTop: 4 }}>
+                <Link to="/skills" className="btn btn-primary">
+                  Continue to Skills
+                </Link>
+              </div>
+            </section>
+          )}
+
+          {!loading && result && (
+            <section className="card reset-analysis-card">
+              <div className="card-title">Start fresh</div>
+              <p>
+                Clear your current analysis and progress to analyze a new CV from scratch. Your profile
+                details (Programme, Year, Study time) are kept.
+              </p>
+              <div style={{ marginTop: 10 }}>
+                <button className="btn" onClick={handleResetAnalysis} disabled={resetting}>
+                  {resetting ? "Clearing..." : "Start fresh with a new CV"}
+                </button>
+              </div>
+              {resetError && <p className="error-text">{resetError}</p>}
+            </section>
+          )}
+
+          <section className="card">
+            <div className="card-title">Before you upload</div>
+            <ul>
+              <li>Text-based PDFs extract best. Scanned or image-only CVs cannot be read.</li>
+              <li>Keep skills in a clearly labelled section (e.g. "Skills" or "Technical Skills") so the parser can find them.</li>
+              <li>You can add any missed skills manually on the Skills page afterward.</li>
+            </ul>
+          </section>
+
+          <section className="card data-handling-card">
+            <div className="mono-label">Data handling</div>
+            <p>
+              Only your extracted skills, role-fit results, and roadmap are stored. Uploaded files are processed
+              in memory and are not written to disk or retained anywhere after analysis.
+            </p>
           </section>
         </div>
       </div>

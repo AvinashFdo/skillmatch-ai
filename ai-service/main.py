@@ -95,11 +95,20 @@ async def analyze_file(file: UploadFile = File(...)):
     file_bytes = await file.read()
 
     try:
-        cv_text = extract_text_from_file(file.filename or "", file_bytes)
+        extraction = extract_text_from_file(file.filename or "", file_bytes)
     except FileExtractionError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
     try:
-        return analyze_cv(cv_text)
+        result = analyze_cv(extraction["text"])
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {exc}")
+
+    # page_count is only ever real for PDFs (None for DOCX - see
+    # file_extractor.extract_text_from_docx) - merged in here rather
+    # than inside analyze_cv() since it's about the SOURCE FILE, not
+    # the analysis pipeline itself, and analyze_cv() is also used by
+    # the plain-text /analyze endpoint, which has no file/page concept
+    # at all.
+    result["page_count"] = extraction["page_count"]
+    return result
