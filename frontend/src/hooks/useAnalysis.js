@@ -131,7 +131,16 @@ export default function useAnalysis() {
     // available from other pages after navigating away from Dashboard.
     // The correction is still logged correctly; only its optional
     // cvSnippetHash ends up unset in that case.
-    await apiClient.post("/cv/correction", { skill }, authHeaders);
+    const res = await apiClient.post("/cv/correction", { skill }, authHeaders);
+    // The backend folds the skill into lastAnalysis and re-scores Role
+    // Matches/Roadmap against it (see cv.js), returning the updated full
+    // analysis - update this page's copy of `result` immediately rather
+    // than waiting for a future remount's GET /user/analysis, so a
+    // correction added on /skills is reflected without needing a
+    // navigation away and back.
+    if (res.data.analysis) {
+      setResult(res.data.analysis);
+    }
   }
 
   return {

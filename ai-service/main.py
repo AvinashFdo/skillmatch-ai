@@ -25,7 +25,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from scripts.analyze_cv import analyze_cv
+from scripts.analyze_cv import analyze_cv, rescore_skills
 from scripts.file_extractor import FileExtractionError, extract_text_from_file
 from scripts.roles_repository import fetch_all_roles
 
@@ -53,6 +53,10 @@ app.add_middleware(
 
 class AnalyzeRequest(BaseModel):
     cv_text: str = Field(..., description="Raw CV text to analyze.")
+
+
+class RescoreRequest(BaseModel):
+    skills: list[str] = Field(..., description="Full updated list of matched skill names.")
 
 
 @app.get("/health")
@@ -83,6 +87,24 @@ def analyze(request: AnalyzeRequest):
         # Any unexpected pipeline failure (bad dataset, extraction error,
         # etc.) is surfaced as a 500 rather than crashing the process.
         raise HTTPException(status_code=500, detail=f"Analysis failed: {exc}")
+
+
+@app.post("/rescore")
+def rescore(request: RescoreRequest):
+    """
+    Re-runs role-fit scoring and roadmap generation for an already-known
+    skill list (no text extraction). Used by the backend's /cv/correction
+    route to fold a manually-added skill into an existing analysis's
+    Role Matches/Roadmap without needing the original CV text, which the
+    backend never persists.
+    """
+    if not request.skills:
+        raise HTTPException(status_code=400, detail="skills must not be empty.")
+
+    try:
+        return rescore_skills(request.skills)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Rescoring failed: {exc}")
 
 
 @app.post("/analyze-file")

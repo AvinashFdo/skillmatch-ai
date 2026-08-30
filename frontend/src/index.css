@@ -1217,7 +1217,20 @@ a:hover {
   line-height: 1.8;
 }
 
-.card a {
+/* :not(.btn) is the actual fix for a second, worse variant of the
+   invisible-button-text bug (see the .btn:hover/.btn-primary:hover
+   comments above): `.card a` has HIGHER specificity than `.btn-primary`
+   (class+element beats a single class), so any Link-rendered
+   .btn/.btn-primary nested inside a .card - e.g. Dashboard's "Get
+   started", CV & Profile's "Continue to Skills" - had this rule's
+   color: var(--color-accent) win over .btn-primary's own color: #fff
+   EVEN AT REST, not just on hover, making the text invisible against
+   the button's own matching-blue background at all times. Excluding
+   .btn here means every .btn/.btn-primary controls its own color
+   regardless of which container it's nested inside, while plain
+   in-card links (e.g. "Analyze a CV on the CV & Profile page first")
+   keep the intended accent-blue styling untouched. */
+.card a:not(.btn) {
   color: var(--color-accent);
   font-weight: 500;
 }
@@ -1760,4 +1773,52 @@ a:hover {
   line-height: 1.6;
   color: var(--color-text-secondary);
   margin: 0;
+}
+
+/* ==========================================================================
+   Modal - reusable confirm dialog (replaces native window.confirm()).
+   Flat/hairline/no-radius, matching every other surface in this design
+   system - no box-shadow, no border-radius, same border/background
+   tokens as .card.
+   ========================================================================== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 25, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 24px;
+  width: 400px;
+  max-width: calc(100vw - 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.modal-message {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
 }

@@ -28,6 +28,45 @@ from roadmap_generator import generate_roadmap
 DATA_PATH = Path(__file__).parent.parent / "data" / "sample_cv_1.txt"
 
 
+def rescore_skills(matched_skills: list) -> dict:
+    """
+    Re-runs role-fit scoring and roadmap generation for an already-known
+    skill list, without re-extracting from CV text. Split out of
+    analyze_cv() so a manually-added correction skill (see
+    backend/src/routes/cv.js's /correction route) can be folded into an
+    existing analysis's extracted_skills and have Role Matches/Roadmap
+    recomputed against it, without needing the original CV text at all -
+    which the backend doesn't even have (cv_text is never persisted, by
+    design).
+
+    Args:
+        matched_skills: full list of skill name strings the candidate
+            has - both originally-extracted and manually-added.
+
+    Returns:
+        dict with the same "extracted_skills"/"role_fit"/
+        "recommended_role" shape analyze_cv() returns (minus the
+        text-extraction-specific word_count/skill_dictionary_size,
+        which have no meaning here since no text was involved).
+    """
+    roles = load_career_roles()
+    role_fit_results = score_all_roles(matched_skills, roles)
+
+    # role_fit_results is sorted best-fit first (see role_fit_scorer.score_all_roles)
+    top_result = role_fit_results[0]
+    top_role = next(r for r in roles if r["role_id"] == top_result["role_id"])
+
+    roadmap = generate_roadmap(
+        top_result["role_id"], top_result["missing_skills"], role=top_role
+    )
+
+    return {
+        "extracted_skills": matched_skills,
+        "role_fit": role_fit_results,
+        "recommended_role": roadmap,
+    }
+
+
 def analyze_cv(cv_text: str) -> dict:
     """
     Runs the full pipeline on raw CV text and returns one combined
@@ -49,31 +88,17 @@ def analyze_cv(cv_text: str) -> dict:
     extraction = extract_skills(cv_text, skill_dictionary)
     matched_skills = extraction["matched_skills"]
 
-    roles = load_career_roles()
-    role_fit_results = score_all_roles(matched_skills, roles)
-
-    # role_fit_results is sorted best-fit first (see role_fit_scorer.score_all_roles)
-    top_result = role_fit_results[0]
-    top_role = next(r for r in roles if r["role_id"] == top_result["role_id"])
-
-    roadmap = generate_roadmap(
-        top_result["role_id"], top_result["missing_skills"], role=top_role
-    )
-
-    return {
-        "extracted_skills": matched_skills,
-        "role_fit": role_fit_results,
-        "recommended_role": roadmap,
-        # Real pipeline numbers for the frontend's "honest pipeline
-        # breakdown" display (CV & Profile page) - word_count is of
-        # whatever text was actually analyzed (pasted or extracted from
-        # a file, the caller doesn't need to distinguish here since
-        # cv_text is already just a string either way), and
-        # skill_dictionary_size is extraction["total_dictionary_skills_checked"]
-        # under a clearer name for API consumers outside this module.
-        "word_count": len(cv_text.split()),
-        "skill_dictionary_size": extraction["total_dictionary_skills_checked"],
-    }
+    result = rescore_skills(matched_skills)
+    # Real pipeline numbers for the frontend's "honest pipeline
+    # breakdown" display (CV & Profile page) - word_count is of whatever
+    # text was actually analyzed (pasted or extracted from a file, the
+    # caller doesn't need to distinguish here since cv_text is already
+    # just a string either way), and skill_dictionary_size is
+    # extraction["total_dictionary_skills_checked"] under a clearer name
+    # for API consumers outside this module.
+    result["word_count"] = len(cv_text.split())
+    result["skill_dictionary_size"] = extraction["total_dictionary_skills_checked"]
+    return result
 
 
 def analyze_cv_file(file_path: str) -> dict:

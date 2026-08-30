@@ -9,14 +9,17 @@ import { computeAnalysisStats } from "../utils/analysisStats";
  * we missed?" correction form, moved here from what used to be inline
  * on the single Dashboard page (see AnalysisResults.jsx, now retired).
  *
- * manualSkills (skills added via the correction form) stays local
- * component state, same as before the page split - it's a session-only
- * visual acknowledgement, not persisted server-side (only the
- * correction LOG entry is persisted, via POST /cv/correction). That
- * means navigating away from /skills and back, or refreshing, resets
- * the "(added by you)" tags even though the underlying correction was
- * already logged - a pre-existing limitation, not a regression from the
- * page split. See CLAUDE_LOG.md.
+ * manualSkills (skills added via the correction form) is local
+ * component state used only to render the "(added by you)" tag
+ * distinctly during this session - the skill itself is now genuinely
+ * persisted server-side too (folded into lastAnalysis.extracted_skills
+ * and re-scored against every role, via POST /cv/correction - see
+ * cv.js), so it survives a refresh and shows up in Role Matches/Roadmap/
+ * Dashboard as a real matched skill. Only the "(added by you)" visual
+ * distinction is session-only; after a refresh the skill still appears,
+ * just as a normal extracted-skill tag rather than a manual one - which
+ * is correct, since by then it's indistinguishable from any other
+ * matched skill.
  */
 export default function SkillsPage() {
   const { result, completedSkills, loading, addCorrection } = useAnalysis();
@@ -33,22 +36,29 @@ export default function SkillsPage() {
     const skill = correctionInput.trim();
     if (!skill) return;
 
-    if (stats.extractedSkills.includes(skill) || manualSkills.includes(skill)) {
+    if (stats.extractedSkills.some((s) => s.toLowerCase() === skill.toLowerCase())) {
       setCorrectionInput("");
       return;
     }
 
-    setManualSkills((prev) => [...prev, skill]);
     setCorrectionInput("");
 
     try {
       await addCorrection(skill);
+      // addCorrection() already updates `result` (and therefore
+      // stats.extractedSkills) via setResult() inside useAnalysis - this
+      // only tracks which skill(s) to tag "(added by you)" this session.
+      setManualSkills((prev) => [...prev, skill]);
     } catch {
-      setCorrectionError("Skill added above, but logging the correction failed.");
+      setCorrectionError("Could not save that correction. Please try again.");
     }
   }
 
-  const totalExtracted = stats.totalExtracted + manualSkills.length;
+  const manualSkillsLower = manualSkills.map((s) => s.toLowerCase());
+  const autoExtractedSkills = stats.extractedSkills.filter(
+    (s) => !manualSkillsLower.includes(s.toLowerCase())
+  );
+  const totalExtracted = stats.totalExtracted;
 
   return (
     <div className="app-shell">
@@ -79,7 +89,7 @@ export default function SkillsPage() {
             <section className="card">
               <div className="card-title">Extracted skills ({totalExtracted})</div>
               <div className="tag-list">
-                {stats.extractedSkills.map((skill) => (
+                {autoExtractedSkills.map((skill) => (
                   <span className="tag" key={skill}>
                     {skill}
                   </span>

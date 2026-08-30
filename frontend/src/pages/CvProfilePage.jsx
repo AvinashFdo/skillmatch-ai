@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
+import Modal from "../components/Modal";
 import useAnalysis from "../hooks/useAnalysis";
 
 function formatFileSize(bytes) {
@@ -54,6 +55,7 @@ export default function CvProfilePage() {
 
   const [resetting, setResetting] = useState(false);
   const [resetError, setResetError] = useState("");
+  const [resetModalOpen, setResetModalOpen] = useState(false);
 
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({ programme: "", year: "", studyHoursPerWeek: "" });
@@ -155,12 +157,11 @@ export default function CvProfilePage() {
     }
   }
 
-  async function handleResetAnalysis() {
-    const confirmed = window.confirm(
-      "This will clear your current analysis and progress. Your profile details will be kept. Continue?"
-    );
-    if (!confirmed) return;
+  function handleResetAnalysis() {
+    setResetModalOpen(true);
+  }
 
+  async function handleConfirmReset() {
     setResetError("");
     setResetting(true);
     try {
@@ -169,6 +170,7 @@ export default function CvProfilePage() {
       setSelectedFile(null);
       setError("");
       setFileError("");
+      setResetModalOpen(false);
     } catch (err) {
       if (err.response?.status === 401) {
         logout();
@@ -176,6 +178,7 @@ export default function CvProfilePage() {
         return;
       }
       setResetError(err.response?.data?.error || "Could not clear your analysis. Please try again.");
+      setResetModalOpen(false);
     } finally {
       setResetting(false);
     }
@@ -417,6 +420,17 @@ export default function CvProfilePage() {
           </section>
         </div>
       </div>
+
+      <Modal
+        open={resetModalOpen}
+        title="Start fresh with a new CV?"
+        message="This will clear your current analysis and progress. Your profile details (Programme, Year, Study time) will be kept."
+        confirmLabel="Continue"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmReset}
+        onCancel={() => setResetModalOpen(false)}
+        confirming={resetting}
+      />
     </div>
   );
 }

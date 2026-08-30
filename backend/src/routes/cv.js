@@ -125,9 +125,18 @@ router.post("/analyze-file", requireAuth, (req, res, next) => {
  * POST /api/cv/correction  (protected)
  * Logs a manually-added skill (one the extractor missed), per lecturer
  * feedback that these corrections should feed back into a log for
- * spotting recurring extraction failures. Purely additive to the
- * existing analyze pipeline - this route does not call the AI service
- * or re-score anything (see CLAUDE_LOG.md for that scoping decision).
+ * spotting recurring extraction failures.
+ *
+ * Also folds the skill into the user's persisted lastAnalysis (if one
+ * exists) so it actually counts wherever a role requires it - Role
+ * Matches, Roadmap, and Dashboard's stat cards all read from
+ * lastAnalysis, so a correction that only lived in frontend component
+ * state (the original implementation) never showed up there and was
+ * lost on refresh. Re-scoring reuses the AI service's existing
+ * role_fit_scorer/roadmap_generator logic via POST /rescore - no
+ * duplicated scoring logic here, this route just merges the result back
+ * into lastAnalysis and re-saves it, the same way /analyze and
+ * /analyze-file already do.
  *
  * cv_text is optional and used only to derive a SHA-256 hash for
  * cvSnippetHash - the raw text itself is never persisted, never sent
@@ -139,20 +148,65 @@ router.post("/correction", requireAuth, async (req, res, next) => {
   if (!skill || !skill.trim()) {
     return res.status(400).json({ error: "skill is required." });
   }
+  const trimmedSkill = skill.trim();
 
   try {
     const cvSnippetHash = cv_text
       ? crypto.createHash("sha256").update(cv_text).digest("hex")
       : undefined;
 
-    const entry = await CorrectionLog.create({
+    await CorrectionLog.create({
       userId: req.user.userId,
       cvSnippetHash,
-      skillAdded: skill.trim(),
+      skillAdded: trimmedSkill,
     });
 
-    res.status(201).json(entry);
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    // No existing analysis to fold this into - the correction is still
+    // logged above (for the recurring-failure log), there's just
+    // nothing to rescore/persist yet.
+    if (!user.lastAnalysis) {
+      return res.status(200).json({ logged: true, analysis: null });
+    }
+
+    const currentSkills = user.lastAnalysis.extracted_skills || [];
+    const alreadyPresent = currentSkills.some(
+      (s) => s.toLowerCase() === trimmedSkill.toLowerCase()
+    );
+
+    if (alreadyPresent) {
+      return res.status(200).json({ logged: true, analysis: user.lastAnalysis });
+    }
+
+    const updatedSkills = [...currentSkills, trimmedSkill];
+    const rescoreResponse = await axios.post(`${process.env.AI_SERVICE_URL}/rescore`, {
+      skills: updatedSkills,
+    });
+
+    const updatedAnalysis = {
+      ...user.lastAnalysis,
+      extracted_skills: rescoreResponse.data.extracted_skills,
+      role_fit: rescoreResponse.data.role_fit,
+      recommended_role: rescoreResponse.data.recommended_role,
+    };
+
+    await User.findByIdAndUpdate(req.user.userId, { lastAnalysis: updatedAnalysis });
+    res.json({ logged: true, analysis: updatedAnalysis });
   } catch (err) {
+    if (err.code === "ECONNREFUSED") {
+      return res.status(503).json({
+        error: "AI service is unreachable. Is it running at " + process.env.AI_SERVICE_URL + "?",
+      });
+    }
+
+    if (err.response) {
+      return res.status(err.response.status).json(err.response.data);
+    }
+
     next(err);
   }
 });
