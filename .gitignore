@@ -30,3 +30,6 @@ Thumbs.db
 # AI-assisted development artifacts - never commit these
 CLAUDE_LOG.md
 .claude/
+
+# Design mockup reference, not part of the application
+design_reference.html
