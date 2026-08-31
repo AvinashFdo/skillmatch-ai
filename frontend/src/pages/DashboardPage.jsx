@@ -8,37 +8,13 @@ const ROLE_PREVIEW_COUNT = 5;
 const NEXT_ACTIONS_COUNT = 3;
 const PRIORITY_LABELS = { high: "HIGH PRIORITY", medium: "MEDIUM PRIORITY", low: "LOW PRIORITY" };
 
-/**
- * Overview/landing page - matches design_reference.html's actual
- * Dashboard (FIG 02) more precisely than the earlier version of this
- * page did. Re-reading the reference closely showed its Dashboard has
- * NO CV upload and NO profile form at all - just the 4 stat cards and a
- * role-fit preview; those two other things live on their own "CV &
- * Profile" page. Moved both of them out to CvProfilePage.jsx
- * accordingly - this page is now purely a summary + navigation hub:
- * the 4 stat cards, a top-5 role-fit preview (linking to the full
- * table on /roles), a "Next actions" panel, and links into the other
- * pages.
- *
- * The reference's Dashboard also has an "Activity" feed - deliberately
- * NOT reproduced here, still out of scope: it would need a real event-
- * logging system this app doesn't have yet (see CLAUDE_LOG.md).
- * "Next actions" doesn't have that problem - it's just a derived view
- * over data the app already has (the current roadmap's missing skills +
- * completedSkills), the same two inputs computeAnalysisStats already
- * combines for the ROADMAP TASKS stat card.
- */
+// Summary + navigation hub - CV upload and profile editing live on CvProfilePage
 export default function DashboardPage() {
   const { result, completedSkills, loading } = useAnalysis();
   const stats = computeAnalysisStats(result, completedSkills);
   const hasResult = Boolean(result);
   const roleFitPreview = (result?.role_fit || []).slice(0, ROLE_PREVIEW_COUNT);
-  // allMissingSkills is already ordered high -> medium -> low (see
-  // analysisStats.js - built from roadmap.learning_order, which the AI
-  // service returns grouped by priority tier in that order, the same
-  // ordering /roadmap's own priority cards render in) - filtering out
-  // completed skills and taking the first 3 preserves that ordering,
-  // no separate sort needed.
+  // allMissingSkills is already priority-ordered, so this preserves that ordering
   const nextActions = stats.allMissingSkills
     .filter((s) => !completedSkills.includes(s.skill))
     .slice(0, NEXT_ACTIONS_COUNT);

@@ -4,18 +4,7 @@ import StepIndicator from "../components/StepIndicator";
 import useAnalysis from "../hooks/useAnalysis";
 import { computeAnalysisStats, estimateRoadmapWeeks } from "../utils/analysisStats";
 
-/**
- * Page 4 of 4 - the priority-tiered missing-skills checklist (with
- * progress toggling), recommended resources, suggested projects, and
- * the Generate Report link. Moved here from what used to be inline on
- * the single Dashboard page.
- *
- * The checkbox containing-block fix from the earlier scroll-jump bug
- * (`.priority-checklist-row { position: relative; }` in index.css)
- * lives at the CSS-class level, not tied to which page renders this
- * markup - so it applies here unchanged. Re-verified live after the
- * page split rather than assumed (see CLAUDE_LOG.md).
- */
+// Priority-tiered missing-skills checklist, resources, projects, and Generate Report link
 export default function RoadmapPage() {
   const { result, completedSkills, initialCompletedSkills, profile, loading, toggleSkill } = useAnalysis();
   const navigate = useNavigate();
@@ -98,14 +87,7 @@ export default function RoadmapPage() {
                       <div>
                         {group.skills.map((s) => {
                           const isDone = completedSkills.includes(s.skill);
-                          // "Carried over" = already complete before this
-                          // page's data loaded, not just checked in this
-                          // session - see the completedSkills investigation
-                          // in CLAUDE_LOG.md (completedSkills is global/
-                          // role-agnostic by deliberate design, so a skill
-                          // completed under a previous top role can show
-                          // up pre-checked here; this hint just makes that
-                          // visible instead of silent).
+                          // already complete before this page's data loaded, not just checked now
                           const wasCarriedOver = isDone && initialCompletedSkills.includes(s.skill);
                           return (
                             <label

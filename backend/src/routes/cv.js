@@ -13,9 +13,6 @@ const router = express.Router();
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 const ALLOWED_EXTENSIONS = [".pdf", ".docx"];
 
-// Holds the uploaded file in memory only (never written to disk) -
-// fine at this size cap, and simplest to immediately forward to the
-// AI service without a temp-file cleanup step.
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE_BYTES },
@@ -29,12 +26,7 @@ const upload = multer({
   },
 });
 
-/**
- * POST /api/cv/analyze  (protected)
- * Forwards CV text to the Python AI service's /analyze endpoint and
- * returns its response unchanged. The frontend never talks to the AI
- * service directly - this route is the only path to it.
- */
+// POST /api/cv/analyze (protected)
 router.post("/analyze", requireAuth, async (req, res, next) => {
   const { cv_text } = req.body;
 
@@ -56,8 +48,6 @@ router.post("/analyze", requireAuth, async (req, res, next) => {
     }
 
     if (err.response) {
-      // AI service responded with an error (e.g. 400/500) - pass its
-      // status and message through rather than masking it as a 500.
       return res.status(err.response.status).json(err.response.data);
     }
 
@@ -65,13 +55,7 @@ router.post("/analyze", requireAuth, async (req, res, next) => {
   }
 });
 
-/**
- * POST /api/cv/analyze-file  (protected)
- * Accepts a multipart file upload (.pdf/.docx, capped at 5MB), forwards
- * it to the AI service's /analyze-file endpoint, and returns the same
- * combined result shape as /analyze. Additive alongside the existing
- * text-paste flow - that route is untouched.
- */
+// POST /api/cv/analyze-file (protected)
 router.post("/analyze-file", requireAuth, (req, res, next) => {
   upload.single("file")(req, res, async (err) => {
     if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
@@ -94,11 +78,6 @@ router.post("/analyze-file", requireAuth, (req, res, next) => {
         formData,
         { headers: formData.getHeaders() }
       );
-      // The AI service only ever sees the file's bytes and the name we
-      // pass it above - it has no idea what the original upload's size
-      // was (multer already knows both from req.file), so the original
-      // filename/size are merged in here rather than round-tripped
-      // through the AI service for no reason.
       const responseData = {
         ...aiResponse.data,
         fileName: req.file.originalname,
@@ -122,27 +101,7 @@ router.post("/analyze-file", requireAuth, (req, res, next) => {
   });
 });
 
-/**
- * POST /api/cv/correction  (protected)
- * Logs a manually-added skill (one the extractor missed), per lecturer
- * feedback that these corrections should feed back into a log for
- * spotting recurring extraction failures.
- *
- * Also folds the skill into the user's persisted lastAnalysis (if one
- * exists) so it actually counts wherever a role requires it - Role
- * Matches, Roadmap, and Dashboard's stat cards all read from
- * lastAnalysis, so a correction that only lived in frontend component
- * state (the original implementation) never showed up there and was
- * lost on refresh. Re-scoring reuses the AI service's existing
- * role_fit_scorer/roadmap_generator logic via POST /rescore - no
- * duplicated scoring logic here, this route just merges the result back
- * into lastAnalysis and re-saves it, the same way /analyze and
- * /analyze-file already do.
- *
- * cv_text is optional and used only to derive a SHA-256 hash for
- * cvSnippetHash - the raw text itself is never persisted, never sent
- * anywhere beyond this one hashing step.
- */
+// POST /api/cv/correction (protected)
 router.post("/correction", requireAuth, async (req, res, next) => {
   const { skill, cv_text } = req.body;
 
@@ -167,9 +126,6 @@ router.post("/correction", requireAuth, async (req, res, next) => {
       return res.status(404).json({ error: "User not found." });
     }
 
-    // No existing analysis to fold this into - the correction is still
-    // logged above (for the recurring-failure log), there's just
-    // nothing to rescore/persist yet.
     if (!user.lastAnalysis) {
       return res.status(200).json({ logged: true, analysis: null });
     }

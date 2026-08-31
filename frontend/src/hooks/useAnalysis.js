@@ -3,43 +3,13 @@ import { useNavigate } from "react-router-dom";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
-/**
- * Shared data layer for the four analysis pages (Dashboard/Skills/Roles/
- * Roadmap). Each page mounts independently via its own route, so results
- * can no longer be passed in-memory between them - this hook fetches the
- * logged-in user's persisted lastAnalysis (GET /api/user/analysis) and
- * completedSkills (GET /api/user/me) on every mount, which is what makes
- * a direct visit or a refresh of any single page correctly restore data
- * instead of showing blank/broken state.
- *
- * A 404 from /user/analysis just means "no analysis yet" - treated as a
- * normal, expected result (null), not an error.
- *
- * Also fetches the user's optional profile fields (programme, year,
- * studyHoursPerWeek) from the same /user/me call rather than a separate
- * request - Dashboard's profile panel and Roadmap's time estimate both
- * need it, and /user/me already returns it now.
- *
- * resetAnalysis() ("Start fresh") clears result/completedSkills both
- * server-side (DELETE /user/analysis) and in this hook's local state
- * immediately, rather than waiting for a refetch - lets the calling
- * page (CvProfilePage) drop straight back into its empty/ready-for-a-
- * new-CV state without a round-trip delay. profile is untouched, by
- * design - it describes the student, not a specific analysis.
- */
+// Shared data layer for the Dashboard/Skills/Roles/Roadmap pages
 export default function useAnalysis() {
   const { token, logout } = useAuth();
   const navigate = useNavigate();
 
   const [result, setResult] = useState(null);
   const [completedSkills, setCompletedSkills] = useState([]);
-  // A frozen snapshot of completedSkills as it was the moment this page's
-  // data finished loading - never updated by toggleSkill afterward. Lets
-  // the UI tell "was already complete before this page loaded" (e.g.
-  // carried over from a previous analysis under a different top role -
-  // see the completedSkills investigation in CLAUDE_LOG.md) apart from
-  // "checked just now in this session", without needing any new API call
-  // or touching the completedSkills data model itself.
   const [initialCompletedSkills, setInitialCompletedSkills] = useState([]);
   const [profile, setProfile] = useState({ programme: "", year: "", studyHoursPerWeek: null });
   const [loading, setLoading] = useState(true);
@@ -94,8 +64,7 @@ export default function useAnalysis() {
   }, [token, handleAuthError]);
 
   async function toggleSkill(skill) {
-    // Optimistic update so the checkbox feels instant; the PATCH
-    // response is the source of truth and overwrites this if different.
+    // optimistic update, reverted below on failure
     setCompletedSkills((prev) =>
       prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
     );
@@ -103,16 +72,10 @@ export default function useAnalysis() {
     try {
       const res = await apiClient.patch("/user/progress", { skill }, authHeaders);
       setCompletedSkills(res.data.completedSkills);
-      // The backend folds a completed skill into lastAnalysis and
-      // re-scores Role Matches/Roadmap against it (same mechanism as a
-      // manual correction - see cv.js/user.js) - update this page's
-      // `result` immediately so Roadmap's own readiness/checklist react
-      // right away, without waiting for a future remount's refetch.
       if (res.data.analysis) {
         setResult(res.data.analysis);
       }
     } catch (err) {
-      // Revert the optimistic update on failure.
       setCompletedSkills((prev) =>
         prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
       );
@@ -133,19 +96,7 @@ export default function useAnalysis() {
   }
 
   async function addCorrection(skill) {
-    // cv_text is intentionally omitted here - the raw pasted text only
-    // ever lived in Dashboard's local component state and was never
-    // persisted server-side (by design - see cv.js), so it isn't
-    // available from other pages after navigating away from Dashboard.
-    // The correction is still logged correctly; only its optional
-    // cvSnippetHash ends up unset in that case.
     const res = await apiClient.post("/cv/correction", { skill }, authHeaders);
-    // The backend folds the skill into lastAnalysis and re-scores Role
-    // Matches/Roadmap against it (see cv.js), returning the updated full
-    // analysis - update this page's copy of `result` immediately rather
-    // than waiting for a future remount's GET /user/analysis, so a
-    // correction added on /skills is reflected without needing a
-    // navigation away and back.
     if (res.data.analysis) {
       setResult(res.data.analysis);
     }

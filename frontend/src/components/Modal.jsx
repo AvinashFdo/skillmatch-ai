@@ -1,18 +1,6 @@
 import { useEffect } from "react";
 
-/**
- * Reusable confirm-style modal - replaces native window.confirm() so the
- * dialog matches the app's own design language instead of the browser's
- * unstyled default. Deliberately minimal (overlay + title + message +
- * Cancel/Continue) rather than a full-featured dialog system, since
- * "Start fresh" on CV & Profile is the only caller today - built generic
- * enough (title/message/labels as props) to reuse for a future
- * confirmation without changes.
- *
- * Not a <dialog> element - plain div + overlay, styled to match the
- * app's existing flat/hairline-border/no-radius look (see .modal-* rules
- * in index.css) rather than relying on browser-default <dialog> chrome.
- */
+// Reusable confirm-style modal - replaces native window.confirm()
 export default function Modal({
   open,
   title,

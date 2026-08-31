@@ -1,57 +1,17 @@
-"""
-role_fit_scorer.py
--------------------
-Takes the skills extracted by skill_extractor.py and scores how well a
-candidate fits each of the career roles defined in MongoDB (edited via
-the admin panel - see roles_repository.py).
-
-Scoring approach (weighted priority matching):
-    Each required skill (technical or soft) carries a priority of
-    "high", "medium", or "low". These map to numeric weights so that
-    matching a "high" priority skill contributes more to the fit score
-    than matching a "low" priority one.
-
-    fit_score = (sum of weights of matched required skills)
-                / (sum of weights of all required skills for the role)
-                * 100
-
-Missing skills are the required skills NOT found in the candidate's
-extracted skill list. They are returned grouped by category
-(technical/soft) and sorted with higher-priority gaps first, since
-those are the most impactful for the candidate to close.
-
-This module has no dependency on skill_extractor.py's internals - it
-only needs a list/set of matched skill names - so it can be wired into
-a FastAPI endpoint independently.
-"""
-
 import json
 from pathlib import Path
 
 from roles_repository import fetch_all_roles
 
-# Numeric weight assigned to each priority level. Used both for scoring
-# and for ranking missing skills (higher weight = more important gap).
+# Priority-to-weight mapping used by the AI service's scoring formula
 PRIORITY_WEIGHTS = {"high": 3, "medium": 2, "low": 1}
 
 
 def load_career_roles() -> list:
-    """Loads the list of role definitions from MongoDB."""
     return fetch_all_roles()
 
 
 def _score_category(matched_lower: set, skill_entries: list) -> dict:
-    """
-    Scores a single skill category (technical or soft) for one role.
-
-    Args:
-        matched_lower: set of the candidate's matched skills, lowercased.
-        skill_entries: list of {"skill": str, "priority": str} dicts
-            from the role definition for this category.
-
-    Returns a dict with the achieved/possible weight totals plus the
-    matched and missing skill entries (missing sorted by priority desc).
-    """
     matched = []
     missing = []
     achieved_weight = 0
@@ -67,8 +27,6 @@ def _score_category(matched_lower: set, skill_entries: list) -> dict:
         else:
             missing.append(entry)
 
-    # Rank missing skills so the highest-priority gaps appear first -
-    # this ordering drives the roadmap recommendation step later.
     missing.sort(key=lambda e: PRIORITY_WEIGHTS[e["priority"]], reverse=True)
 
     return {
@@ -80,17 +38,6 @@ def _score_category(matched_lower: set, skill_entries: list) -> dict:
 
 
 def score_role(matched_skills, role: dict) -> dict:
-    """
-    Scores a candidate's fit against a single role.
-
-    Args:
-        matched_skills: iterable of skill name strings the candidate has
-            (as produced by skill_extractor.extract_skills).
-        role: one role dict from career_roles.json.
-
-    Returns a JSON-serialisable dict describing the fit score and the
-    skill gap breakdown for this role.
-    """
     matched_lower = {s.lower() for s in matched_skills}
 
     technical = _score_category(matched_lower, role["technical_skills"])
@@ -120,10 +67,6 @@ def score_role(matched_skills, role: dict) -> dict:
 
 
 def score_all_roles(matched_skills, roles: list = None) -> list:
-    """
-    Scores a candidate against every role, sorted best-fit first.
-    This is the shape that will be returned by the FastAPI endpoint.
-    """
     if roles is None:
         roles = load_career_roles()
 
@@ -133,8 +76,6 @@ def score_all_roles(matched_skills, roles: list = None) -> list:
 
 
 if __name__ == "__main__":
-    # Manual end-to-end test: extract skills from the sample CV, then
-    # score that skill set against all 4 roles.
     from skill_extractor import extract_skills_from_file
 
     sample_path = Path(__file__).parent.parent / "data" / "sample_cv_1.txt"

@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 
-// A "high"/"medium"/"low" enum here isn't just data validation - the AI
-// service's scoring engine (ai-service/scripts/role_fit_scorer.py) uses
-// this exact string as a dict key (PRIORITY_WEIGHTS[priority]). Any
-// other value would throw a KeyError and break scoring for every role,
-// not just this one, so this is enforced at the schema level rather
-// than left to the admin form.
+// priority must match the AI service's PRIORITY_WEIGHTS keys exactly
 const skillSchema = new mongoose.Schema(
   {
     skill: { type: String, required: true, trim: true },
@@ -22,12 +17,6 @@ const resourceSchema = new mongoose.Schema(
   { _id: false }
 );
 
-/**
- * Mirrors career_roles.json's per-role structure. Mongo's own `_id`
- * replaces the JSON file's string `role_id` field throughout the app -
- * there was no reason to keep a second identifier once role data moved
- * into a database that already provides one.
- */
 const roleSchema = new mongoose.Schema({
   role_name: { type: String, required: true, trim: true },
   description: { type: String, default: "", trim: true },

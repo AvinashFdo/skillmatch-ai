@@ -1,13 +1,3 @@
-"""
-file_extractor.py
-------------------
-Extracts plain text from an uploaded PDF or DOCX CV file, so it can be
-fed into the existing analyze_cv() pipeline unchanged. Deliberately
-scoped to extraction only - no OCR (won't read scanned/image-only
-PDFs), no layout/formatting preservation, just page/paragraph text
-concatenated in order.
-"""
-
 import io
 
 import pymupdf
@@ -15,15 +5,10 @@ from docx import Document
 
 
 class FileExtractionError(Exception):
-    """Raised for any file we can't turn into usable text - corrupted,
-    empty, unsupported format, or an encrypted PDF - with a message
-    intended to be shown directly to the user."""
+    pass
 
 
 def extract_text_from_pdf(file_bytes: bytes) -> tuple:
-    """Extracts and concatenates text from every page of a PDF. Returns
-    (text, page_count) - page_count comes for free from the already-open
-    pymupdf Document, no extra parsing pass needed."""
     try:
         with pymupdf.open(stream=file_bytes, filetype="pdf") as doc:
             if doc.is_encrypted:
@@ -43,10 +28,6 @@ def extract_text_from_pdf(file_bytes: bytes) -> tuple:
 
 
 def extract_text_from_docx(file_bytes: bytes) -> tuple:
-    """Extracts and concatenates text from every paragraph of a DOCX.
-    Returns (text, None) - python-docx has no page-count concept (that's
-    a rendering-time detail Word computes, not stored in the file), so
-    unlike PDF there's no honest number to report here."""
     try:
         document = Document(io.BytesIO(file_bytes))
         paragraphs_text = [p.text for p in document.paragraphs]
@@ -59,16 +40,6 @@ def extract_text_from_docx(file_bytes: bytes) -> tuple:
 
 
 def extract_text_from_file(filename: str, file_bytes: bytes) -> dict:
-    """
-    Dispatches to the right extractor based on file extension, then
-    validates the result isn't empty (e.g. a scanned/image-only PDF
-    with no selectable text would otherwise silently produce nothing
-    for analyze_cv() to work with).
-
-    Returns {"text": str, "page_count": int | None} - page_count is only
-    ever a real number for PDFs; DOCX always reports None (see
-    extract_text_from_docx).
-    """
     lowered = filename.lower()
 
     if lowered.endswith(".pdf"):

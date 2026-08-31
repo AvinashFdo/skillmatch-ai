@@ -3,13 +3,7 @@ const axios = require("axios");
 
 const router = express.Router();
 
-/**
- * GET /api/roles
- * Proxies to the Python AI service's GET /roles endpoint, returning the
- * full career_roles.json dataset. Left unauthenticated since role
- * information is not user-specific (e.g. useful for a "browse roles"
- * page before signup).
- */
+// GET /api/roles
 router.get("/", async (req, res, next) => {
   try {
     const aiResponse = await axios.get(`${process.env.AI_SERVICE_URL}/roles`);

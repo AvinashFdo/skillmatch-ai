@@ -4,28 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import useAnalysis from "../hooks/useAnalysis";
 import { computeAnalysisStats } from "../utils/analysisStats";
 
-/**
- * Read-only summary of the most recent analysis, formatted for
- * printing/saving as a PDF via the browser's own "Print" dialog -
- * deliberately not a custom PDF generator, per the project's time
- * constraints.
- *
- * Structure matches design_reference.html's FIG 11 (numbered sections
- * on an A4-proportioned document) - but every section is built purely
- * from data the app already produces:
- *   1. Summary       -> the existing roadmap.readiness_summary sentence
- *   2. Confirmed skills -> extracted_skills
- *   3. Priority gaps  -> the existing priority-grouped missing skills
- *   4. Recommended plan -> the existing resources + projects lists
- *   5. Notes and limitations -> static disclaimer copy (not data-driven)
- *
- * Previously received its data via react-router navigation state, set
- * by the (now-retired) single Dashboard page's "Generate Report"
- * button. Now that results live in the 4-page split, this instead
- * fetches the user's persisted lastAnalysis the same way every other
- * page does (useAnalysis) - which also means a direct visit or refresh
- * of /report correctly restores the report instead of going blank.
- */
+// Read-only summary formatted for printing/saving as a PDF via the browser's Print dialog
 export default function ReportPage() {
   const { user } = useAuth();
   const { result, completedSkills, loading } = useAnalysis();

@@ -5,10 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
 import Modal from "../components/Modal";
 
-// Small inline icons rather than an icon library - only two are needed
-// here, and the app already has no other icon usage to justify the
-// dependency. 14x14, stroke-only (currentColor), matching the flat/
-// minimal look used everywhere else in this design system.
+// Inline icons instead of an icon library - only two are needed here
 function EditIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -34,19 +31,7 @@ function TrashIcon() {
   );
 }
 
-// Deliberately simple text formats instead of nested add/remove-row
-// forms, per the "minimal/fast, no polish" scope for this admin panel:
-//   skills:      one "Skill: priority" pair per line
-//   resources:   one "Title|URL" pair per line
-//   projects:    one project description per line
-//
-// Skills used to be comma-joined on a single line ("Skill:priority,
-// Skill:priority"), which silently produced corrupted data (skill names
-// with embedded newlines, priority defaulting to "medium" with no
-// warning) whenever an admin typed one skill per line instead - a
-// textarea invites exactly that. One-pair-per-line matches how a
-// textarea is naturally used, and any line that doesn't parse is now
-// surfaced as an error instead of silently accepted.
+// Textarea format: one "Skill: priority" pair per line
 const VALID_PRIORITIES = ["high", "medium", "low"];
 
 function parseSkills(text, fieldLabel) {

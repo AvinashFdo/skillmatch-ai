@@ -7,10 +7,7 @@ const router = express.Router();
 
 const SALT_ROUNDS = 10;
 
-/**
- * POST /api/auth/register
- * Creates a new user with a bcrypt-hashed password.
- */
+// POST /api/auth/register
 router.post("/register", async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -36,10 +33,7 @@ router.post("/register", async (req, res, next) => {
   }
 });
 
-/**
- * POST /api/auth/login
- * Verifies credentials and returns a signed JWT on success.
- */
+// POST /api/auth/login
 router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;

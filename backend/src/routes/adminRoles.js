@@ -3,13 +3,7 @@ const Role = require("../models/Role");
 
 const router = express.Router();
 
-// Protected by requireAuth + requireAdmin, both mounted in server.js -
-// only users with role "admin" can reach any route in this router.
-
-/**
- * GET /api/admin/roles
- * Lists all roles, used by the admin panel's table view.
- */
+// GET /api/admin/roles
 router.get("/", async (req, res, next) => {
   try {
     const roles = await Role.find().sort({ role_name: 1 });
@@ -19,12 +13,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-/**
- * POST /api/admin/roles
- * Creates a new role. Mongoose schema validation (see Role.js) rejects
- * any skill priority outside high/medium/low, since an invalid value
- * would otherwise break the AI service's scoring for every role.
- */
+// POST /api/admin/roles
 router.post("/", async (req, res, next) => {
   try {
     const role = await Role.create(req.body);
@@ -37,10 +26,7 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-/**
- * PUT /api/admin/roles/:id
- * Updates an existing role by its Mongo _id.
- */
+// PUT /api/admin/roles/:id
 router.put("/:id", async (req, res, next) => {
   try {
     const role = await Role.findByIdAndUpdate(req.params.id, req.body, {
@@ -61,9 +47,7 @@ router.put("/:id", async (req, res, next) => {
   }
 });
 
-/**
- * DELETE /api/admin/roles/:id
- */
+// DELETE /api/admin/roles/:id
 router.delete("/:id", async (req, res, next) => {
   try {
     const role = await Role.findByIdAndDelete(req.params.id);

@@ -5,23 +5,7 @@ import StepIndicator from "../components/StepIndicator";
 import useAnalysis from "../hooks/useAnalysis";
 import { computeAnalysisStats } from "../utils/analysisStats";
 
-/**
- * Page 2 of 4 - the detailed extracted-skills list plus the "Add a skill
- * we missed?" correction form, moved here from what used to be inline
- * on the single Dashboard page (see AnalysisResults.jsx, now retired).
- *
- * manualSkills (skills added via the correction form) is local
- * component state used only to render the "(added by you)" tag
- * distinctly during this session - the skill itself is now genuinely
- * persisted server-side too (folded into lastAnalysis.extracted_skills
- * and re-scored against every role, via POST /cv/correction - see
- * cv.js), so it survives a refresh and shows up in Role Matches/Roadmap/
- * Dashboard as a real matched skill. Only the "(added by you)" visual
- * distinction is session-only; after a refresh the skill still appears,
- * just as a normal extracted-skill tag rather than a manual one - which
- * is correct, since by then it's indistinguishable from any other
- * matched skill.
- */
+// manualSkills is session-only, just for the "(added by you)" tag - the skill itself is persisted server-side
 export default function SkillsPage() {
   const { result, completedSkills, loading, addCorrection } = useAnalysis();
   const stats = computeAnalysisStats(result, completedSkills);
@@ -46,9 +30,6 @@ export default function SkillsPage() {
 
     try {
       await addCorrection(skill);
-      // addCorrection() already updates `result` (and therefore
-      // stats.extractedSkills) via setResult() inside useAnalysis - this
-      // only tracks which skill(s) to tag "(added by you)" this session.
       setManualSkills((prev) => [...prev, skill]);
     } catch {
       setCorrectionError("Could not save that correction. Please try again.");

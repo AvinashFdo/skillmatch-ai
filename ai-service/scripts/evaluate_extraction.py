@@ -1,27 +1,3 @@
-"""
-evaluate_extraction.py
------------------------
-Evaluates skill_extractor.py's accuracy against manually-verified
-ground truth annotations (data/ground_truth_annotations.json), using
-standard Precision/Recall/F1-Score metrics - the basis for this
-project's Testing and Evaluation chapter.
-
-Per-CV metrics show where extraction is strong or weak on a specific
-profile. The overall score is micro-averaged (TP/FP/FN summed across
-all CVs first, then the three metrics computed once on the totals) -
-the standard approach for this kind of evaluation, since it weights
-every individual skill decision equally rather than every CV equally
-(a CV with many skills would otherwise be under-weighted relative to a
-sparse one).
-
-Matching between system output and ground truth is case-insensitive
-(the dictionary/ground truth otherwise use consistent canonical
-casing, e.g. "Node.js", but this avoids a trivial casing mismatch being
-mistaken for a real extraction failure).
-
-Run with: python evaluate_extraction.py (from ai-service/scripts/)
-"""
-
 import json
 from pathlib import Path
 
@@ -37,9 +13,6 @@ def load_annotations() -> list:
 
 
 def compute_metrics(tp: int, fp: int, fn: int) -> tuple:
-    """Precision/Recall/F1 from raw counts. 0.0 when a denominator is 0
-    (e.g. nothing extracted, or nothing in ground truth) rather than
-    raising a ZeroDivisionError."""
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
     f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
@@ -47,13 +20,9 @@ def compute_metrics(tp: int, fp: int, fn: int) -> tuple:
 
 
 def evaluate_cv(cv_path: Path, ground_truth_skills: list) -> dict:
-    """Runs the real extractor against one CV and diffs it against that
-    CV's ground truth, case-insensitively."""
     extraction = extract_skills_from_file(str(cv_path))
     system_skills = extraction["matched_skills"]
 
-    # Map lowercased -> original casing, so TP/FP/FN can be reported
-    # back using each side's own canonical spelling.
     system_lower = {s.lower(): s for s in system_skills}
     truth_lower = {s.lower(): s for s in ground_truth_skills}
 
@@ -148,9 +117,6 @@ def main():
     print()
     print_table(rows, overall)
 
-    # False negatives called out explicitly for the two CVs designed to
-    # probe known limitations - this is the evidence trail for the
-    # dissertation's limitations discussion.
     for target_file in ("sample_cv_6_uncommon_phrasing.txt", "sample_cv_7_sparse.txt"):
         row = next((r for r in rows if r["cv_file"] == target_file), None)
         if row is None:

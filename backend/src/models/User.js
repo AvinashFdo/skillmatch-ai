@@ -1,9 +1,5 @@
 const mongoose = require("mongoose");
 
-/**
- * Minimal user schema for basic auth. Password is stored as a bcrypt
- * hash only - the plaintext password is never persisted.
- */
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -21,47 +17,21 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true, // bcrypt hash, not plaintext
   },
-  // Real role-based access control - admin routes (adminRoles.js,
-  // adminCorrections.js) require this to be "admin", checked fresh from
-  // the database on every request (see middleware/admin.js), not just
-  // "any logged-in user with a valid JWT" as before. There is no
-  // self-service way to become admin (no signup field, no API route) -
-  // promotion is a manual one-time DB write, by design, since this is a
-  // small fixed-roster student project rather than a multi-tenant app
-  // that needs an admin-invites-admin flow.
+  // no self-service way to become admin - promotion is a manual DB write
   role: {
     type: String,
     enum: ["student", "admin"],
     default: "student",
   },
-  // Skill names the user has marked as done, toward whichever role's
-  // roadmap they were viewing at the time. Deliberately just a flat
-  // list of strings, not tied to a specific role or a separate
-  // collection - the frontend recalculates readiness against whatever
-  // role is currently displayed by intersecting this list with that
-  // role's missing skills.
   completedSkills: {
     type: [String],
     default: [],
   },
-  // The full response from the AI service's /analyze or /analyze-file
-  // (extracted_skills, role_fit, recommended_role/roadmap), saved on
-  // every successful analysis so results survive navigating between the
-  // separate Dashboard/Skills/Roles/Roadmap pages and a page refresh -
-  // each of those pages fetches this via GET /api/user/analysis on
-  // mount instead of relying on in-memory state passed between routes.
-  // Mixed rather than a formal sub-schema since its shape is owned by
-  // the AI service, not this app - keeping it untyped here avoids the
-  // two services' schemas drifting out of sync.
+  // shape owned by the AI service - kept untyped to avoid schema drift
   lastAnalysis: {
     type: mongoose.Schema.Types.Mixed,
     default: null,
   },
-  // Optional student profile fields, set via PATCH /api/user/profile.
-  // studyHoursPerWeek is the only one used functionally - it drives the
-  // roadmap completion-time estimate on /roadmap. programme/year are
-  // purely informational (shown on the Dashboard profile panel) - not
-  // used in any scoring/analysis logic, deliberately, per scope.
   programme: {
     type: String,
     default: "",

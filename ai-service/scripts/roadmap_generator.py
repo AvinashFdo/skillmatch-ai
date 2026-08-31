@@ -1,31 +1,12 @@
-"""
-roadmap_generator.py
----------------------
-Turns a role's missing_skills breakdown (from role_fit_scorer.py) into a
-structured learning roadmap: what to learn first, what resources to use,
-and what projects to build to demonstrate the closed skill gap.
-
-This module has no dependency on how the missing skills were computed -
-it only needs the role_id and a missing_skills dict of the shape produced
-by role_fit_scorer.score_role()/score_all_roles():
-
-    {
-        "technical": [{"skill": str, "priority": "high"|"medium"|"low"}, ...],
-        "soft": [{"skill": str, "priority": "high"|"medium"|"low"}, ...],
-    }
-"""
-
 import json
 from pathlib import Path
 
 DATA_PATH = Path(__file__).parent.parent / "data" / "career_roles.json"
 
-# Defines the learning order: high priority gaps should be tackled first.
 PRIORITY_ORDER = ["high", "medium", "low"]
 
 
 def load_role(role_id: str) -> dict:
-    """Loads a single role definition from career_roles.json by role_id."""
     with open(DATA_PATH, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -37,11 +18,6 @@ def load_role(role_id: str) -> dict:
 
 
 def _group_by_priority(missing_skills: dict) -> dict:
-    """
-    Merges technical + soft missing skills into one learning-order list
-    per priority level. Each entry keeps its category so the dashboard
-    can show whether a gap is technical or a soft skill.
-    """
     grouped = {level: [] for level in PRIORITY_ORDER}
 
     for category in ("technical", "soft"):
@@ -54,11 +30,6 @@ def _group_by_priority(missing_skills: dict) -> dict:
 
 
 def _build_readiness_summary(grouped: dict) -> str:
-    """
-    Builds a one-line, human-readable readiness summary, e.g.
-    "You are missing 3 high priority skills, 2 medium priority skills,
-    and 1 low priority skill for this role."
-    """
     counts = {level: len(grouped[level]) for level in PRIORITY_ORDER}
 
     if sum(counts.values()) == 0:
@@ -81,18 +52,6 @@ def _build_readiness_summary(grouped: dict) -> str:
 
 
 def generate_roadmap(role_id: str, missing_skills: dict, role: dict = None) -> dict:
-    """
-    Builds the full roadmap for a target role.
-
-    Args:
-        role_id: the target role's id, e.g. "frontend_developer".
-        missing_skills: the missing_skills dict for this role, as
-            returned by role_fit_scorer.score_role().
-        role: optional pre-loaded role dict (avoids re-reading the JSON
-            file if the caller already has it, e.g. from analyze_cv.py).
-
-    Returns a JSON-serialisable roadmap dict.
-    """
     if role is None:
         role = load_role(role_id)
 
@@ -115,8 +74,6 @@ def generate_roadmap(role_id: str, missing_skills: dict, role: dict = None) -> d
 
 
 if __name__ == "__main__":
-    # Manual end-to-end test: extract -> score -> generate roadmap for
-    # the frontend_developer role using the sample CV.
     from skill_extractor import extract_skills_from_file
     from role_fit_scorer import score_role
 

@@ -15,33 +15,7 @@ function formatFileSize(bytes) {
   return `${(kb / 1024).toFixed(1)} MB`;
 }
 
-/**
- * CV & Profile page - matches design_reference.html's actual page
- * breakdown more precisely than the earlier 4-page split did. Re-
- * reading the reference's Dashboard (FIG 02) showed it has no CV
- * upload and no profile form at all - those live on a separate "CV &
- * Profile" page. This page is that page: the CV paste/file-upload
- * inputs and the Profile details panel, both moved here from what used
- * to be inline on Dashboard.
- *
- * Design decision (confirmed with the project owner before building):
- * analyzing no longer auto-navigates to /skills. The reference's own
- * FIG 03 shows a manual "Continue to skill validation" step, not an
- * auto-redirect - and this page now needs to actually display the
- * analysis results (file metadata, pipeline breakdown) right after
- * analyzing, which an instant redirect would cut off before the user
- * could see it. The user reviews the results here, then moves on via
- * the sidebar or the "Continue to Skills" link whenever ready.
- *
- * The results panel reads directly off `result` from useAnalysis()
- * rather than separate local state - result.word_count and
- * result.skill_dictionary_size come back from EVERY analysis (text or
- * file - see analyze_cv.py), and result.fileName/fileSize/page_count
- * only exist for file-based analyses (added by cv.js/main.py
- * respectively). Since this is the same persisted result every other
- * page reads, a refresh of this page keeps showing the last analysis's
- * real numbers too - not just a one-time toast.
- */
+// Analyzing no longer auto-navigates to /skills - the user reviews results here first
 export default function CvProfilePage() {
   const { token, logout } = useAuth();
   const navigate = useNavigate();
@@ -187,12 +161,7 @@ export default function CvProfilePage() {
 
   const isFileAnalysis = Boolean(result?.fileName);
   const fileIsPdf = isFileAnalysis && result.fileName.toLowerCase().endsWith(".pdf");
-  // word_count/skill_dictionary_size were added to the analyze pipeline
-  // alongside this panel - an analysis saved before that change (an
-  // older lastAnalysis already persisted for an existing account) won't
-  // have them. Guard rather than assume, so re-visiting this page with
-  // old data shows a graceful fallback instead of crashing on
-  // `undefined.toLocaleString()`.
+  // guards against older lastAnalysis records saved before this field existed
   const hasPipelineMeta = result && typeof result.word_count === "number" && typeof result.skill_dictionary_size === "number";
 
   return (

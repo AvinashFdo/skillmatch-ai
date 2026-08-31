@@ -3,14 +3,7 @@ import Sidebar from "../components/Sidebar";
 import StepIndicator from "../components/StepIndicator";
 import useAnalysis from "../hooks/useAnalysis";
 
-/**
- * Page 3 of 4 - the role-fit table for all 4 roles (design_reference.html's
- * FIG 05 pattern), moved here from what used to be inline on the single
- * Dashboard page. The top row (index 0, highest fit_score_percent) is
- * the current recommended/target role - already sorted best-fit-first by
- * the AI service, and visually marked via the existing
- * data-table-row-lead class.
- */
+// Role-fit table for all roles - already sorted best-fit-first by the AI service
 export default function RolesPage() {
   const { result, loading } = useAnalysis();
   const roleFit = result?.role_fit || [];

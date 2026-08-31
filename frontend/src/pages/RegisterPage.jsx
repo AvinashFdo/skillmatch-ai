@@ -19,8 +19,6 @@ export default function RegisterPage() {
 
     try {
       await register(name, email, password);
-      // Registration succeeded - send the student to login rather than
-      // auto-logging them in, keeping the two flows clearly separate.
       navigate("/login", { state: { justRegistered: true } });
     } catch (err) {
       setError(err.response?.data?.error || "Registration failed. Please try again.");
